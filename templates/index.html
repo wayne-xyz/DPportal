@@ -8,29 +8,16 @@
 </head>
 <body>
 
-<div class="search-container">
-    <h1>Google Drive File Search</h1>
-    <form action="/search" method="post">
-        <input type="text" name="keyword" placeholder="Enter keyword" class="search-bar" required>
-        <br>
-        <button type="submit" class="search-button">Search</button>
-    </form>
-
-    {% if filenames %}
-    <div class="results">
-        <h2>Search Results for "{{ keyword }}":</h2>
-        <ul>
-            {% for filename in filenames %}
-            <li>{{ filename }}</li>
-            {% endfor %}
-        </ul>
+    <div class="search-container">
+        <h1>Google Drive File Search</h1>
+        <input type="text" id="searchInput" placeholder="Enter keyword" class="search-bar" required>
+        <button onclick="performSearch()" class="search-button">Search</button>
+    
+        <div id="results" class="results" style="max-height: 600px; overflow-y: auto; margin-top: 20px;">
+            <!-- Search results will be updated here -->
+        </div>
     </div>
-    {% elif keyword %}
-    <div class="results">
-        <p>No results found for "{{ keyword }}".</p>
-    </div>
-    {% endif %}
-</div>
-
+    
+<script src="{{ url_for('static', filename='search.js') }}"></script>
 </body>
 </html>

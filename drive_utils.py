@@ -11,12 +11,13 @@ os.environ['GOOGLE_DRIVE_CREDENTIALS'] = 'google_drive_credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
 
 
+# folder names
 esri_world_imagery_folder_name="EsriWorldImagery_jpg"
 sentinel_tif_folder_name="sentinel_tif_2024"
 nicfi_folder_name="nicfi_tif_2024"
 
-
-
+# target folders
+target_folders=[esri_world_imagery_folder_name, sentinel_tif_folder_name, nicfi_folder_name]
 
 
 
@@ -102,17 +103,34 @@ def search_drive(query):
     except HttpError as error:
         print(f'An error occurred: {error}')
         return []
-    
 
+# search in a specific folder
 def search_in_folder(folder_id, query_string):
     creds = get_credentials()
-    service = build('drive', 'v3', credentials=creds)
-    query = f"'{folder_id}' in parents and name contains '{query_string}' and trashed=false"
-    results = service.files().list(q=query, fields="files(name)").execute()
-    items = results.get('files', [])
-    
-    return [item['name'] for item in items]
+    try:
+        service = build('drive', 'v3', credentials=creds)
+        query = f"'{folder_id}' in parents and name contains '{query_string}' and trashed=false"
+        results = service.files().list(q=query, fields="files(name)").execute()
+        items = results.get('files', [])
+        
+        return [item['name'] for item in items]
+    except HttpError as error:
+        print(f'An error occurred: {error}')
+        return []
 
+# search in all target folders and add a target folder name to the result
+def search_in_target_folders(query_string):
+    start_time = time.time()
+    results = []
+    for folder_name in target_folders:
+        folder_id = get_folder_id(folder_name)
+        folder_results = search_in_folder(folder_id, query_string)
+        folder_results_with_name = [f"{folder_name}: {result}" for result in folder_results]
+        results.extend(folder_results_with_name)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"Search in target folders took {execution_time:.2f} seconds")
+    return results
 
 
 

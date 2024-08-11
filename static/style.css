@@ -69,3 +69,18 @@ body {
     padding: 10px;
     border-bottom: 1px solid #ddd;
 }
+
+.search-result {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+.search-result h3 {
+    margin-top: 0;
+    color: #333;
+}
+.search-result p {
+    margin-bottom: 0;
+    color: #666;
+}
