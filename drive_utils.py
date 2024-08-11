@@ -11,6 +11,15 @@ os.environ['GOOGLE_DRIVE_CREDENTIALS'] = 'google_drive_credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
 
 
+esri_world_imagery_folder_name="EsriWorldImagery_jpg"
+sentinel_tif_folder_name="sentinel_tif_2024"
+nicfi_folder_name="nicfi_tif_2024"
+
+
+
+
+
+
 # Get credentials from Google Drive  
 def get_credentials():
     creds = None
@@ -95,13 +104,30 @@ def search_drive(query):
         return []
     
 
+def search_in_folder(folder_id, query_string):
+    creds = get_credentials()
+    service = build('drive', 'v3', credentials=creds)
+    query = f"'{folder_id}' in parents and name contains '{query_string}' and trashed=false"
+    results = service.files().list(q=query, fields="files(name)").execute()
+    items = results.get('files', [])
+    
+    return [item['name'] for item in items]
+
+
 
 
 # main function to run the script
 def main():
     check_credentials()
-    folder_id = get_folder_id('Images')
+    folder_id = get_folder_id('EsriWorldImagery_jpg')
     print(folder_id)
+    print(search_in_folder(folder_id, '1822'))
+    folder_id_sentinel=get_folder_id(sentinel_tif_folder_name)
+    print(folder_id_sentinel)
+    print(search_in_folder(folder_id_sentinel, '1822'))
+    folder_id_nicfi=get_folder_id(nicfi_folder_name)
+    print(folder_id_nicfi)
+    print(search_in_folder(folder_id_nicfi, '1822'))
 
 if __name__ == '__main__':
     main()
