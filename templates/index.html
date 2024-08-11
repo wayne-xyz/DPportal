@@ -3,18 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Drive Image Search</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Google Drive File Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Google Drive Image Search</h1>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Enter search term...">
-            <button onclick="performSearch()">Search</button>
-        </div>
-        <div id="results" class="results-container"></div>
+
+<div class="search-container">
+    <h1>Google Drive File Search</h1>
+    <form action="/search" method="post">
+        <input type="text" name="keyword" placeholder="Enter keyword" class="search-bar" required>
+        <br>
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    {% if filenames %}
+    <div class="results">
+        <h2>Search Results for "{{ keyword }}":</h2>
+        <ul>
+            {% for filename in filenames %}
+            <li>{{ filename }}</li>
+            {% endfor %}
+        </ul>
     </div>
-    <script src="script.js"></script>
+    {% elif keyword %}
+    <div class="results">
+        <p>No results found for "{{ keyword }}".</p>
+    </div>
+    {% endif %}
+</div>
+
 </body>
 </html>

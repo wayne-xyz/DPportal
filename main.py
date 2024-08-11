@@ -1,7 +1,8 @@
 from flask import Flask, render_template,request, jsonify
 from drive_utils import search_drive
 
-app = Flask(__name__)
+app = Flask(__name__,static_folder='static')
+
 
 
 @app.route('/')
