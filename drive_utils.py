@@ -1,30 +1,73 @@
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import Flow
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
-
+import pickle
+import time
 import os.path
 
-def search_drive(query):
+os.environ['GOOGLE_DRIVE_CREDENTIALS'] = 'google_drive_credentials.json'
+SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+
+
+# Get credentials from Google Drive  
+def get_credentials():
     creds = None
-    # The file token.json stores the user's access and refresh tokens
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', ['https://www.googleapis.com/auth/drive.readonly'])
-    
-    # If there are no (valid) credentials available, let the user log in.
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            creds = pickle.load(token)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = Flow.from_client_secrets_file(
-                'credentials.json',
-                ['https://www.googleapis.com/auth/drive.readonly'])
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'google_drive_credentials.json',
+                SCOPES
+            )
+            if os.getenv('ENVIRONMENT') == 'production':
+                creds = flow.run_console()
+            else:
+                os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+                creds = flow.run_local_server(port=8080)
+        with open('token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+    return creds
+
+# check if the credentials are valid by calling the drive api and print a message 
+
+
+def check_credentials():
+    creds = get_credentials()
+    service = build('drive', 'v3', credentials=creds)
+    
+    start_time = time.time()
+    
+    # Query Google Drive for folders
+    results = service.files().list(q="mimeType='application/vnd.google-apps.folder'", spaces='drive', fields='nextPageToken, files(id, name)').execute()
+    
+    end_time = time.time()
+    
+    folder_count = len(results.get('files', []))
+    execution_time = end_time - start_time
+    
+    print(f"Found {folder_count} folders")
+    print(f"Query took {execution_time:.2f} seconds")
+
+
+
+
+# get the folder id of the folder with the name of folder_name
+def get_folder_id(folder_name):
+    creds = get_credentials()
+    service = build('drive', 'v3', credentials=creds)
+    results = service.files().list(q=f"name='{folder_name}'", spaces='drive', fields='nextPageToken, files(id, name)').execute()
+    return results.get('files', [])[0]['id']    
+
+
+# Search for files in Google Drive
+def search_drive(query):
+    creds = get_credentials()
 
     try:
         service = build('drive', 'v3', credentials=creds)
@@ -50,3 +93,13 @@ def search_drive(query):
     except HttpError as error:
         print(f'An error occurred: {error}')
         return []
+    
+
+# main function to run the script
+def main():
+    check_credentials()
+    folder_id = get_folder_id('Images')
+    print(folder_id)
+
+if __name__ == '__main__':
+    main()
