@@ -84,3 +84,48 @@ body {
     margin-bottom: 0;
     color: #666;
 }
+
+.result-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.file-info {
+    display: flex;
+
+}
+
+
+
+.file-name {
+    margin-right: 10px;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    align-items: center;
+}
+
+.action-icons {
+    display: flex;
+    gap: 10px;
+}
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    text-decoration: none;
+    color: #333;
+    
+}
+
+.icon-button:hover {
+    background-color: #e0e0e0;
+}

@@ -20,8 +20,12 @@ def search():
     # Format the results to be returned as JSON
     formatted_results = [
         {
-            'folder': result.split(': ')[0],
-            'name': result.split(': ')[1]
+            'folder': result['folder'],
+            'name': result['file']['name'],
+            'thumbnailLink': result['file']['thumbnailLink'],
+            'webViewLink': result['file']['webViewLink'],
+            'webContentLink': result['file']['webContentLink'],
+            'size': result['file']['size']
         }
         for result in results
     ]

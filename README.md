@@ -25,6 +25,12 @@ pip install -r requirements.txt
 
 2. Deploy the app
 
+After updating the code, deploy the app:
 ```
 gcloud app deploy
+```
+
+Monitor the app's logs:
+```
+gcloud app logs tail -s default
 ```

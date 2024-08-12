@@ -6,9 +6,10 @@ from googleapiclient.errors import HttpError
 import pickle
 import time
 import os.path
+import json
 
 os.environ['GOOGLE_DRIVE_CREDENTIALS'] = 'google_drive_credentials.json'
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
 
 # folder names
@@ -110,10 +111,20 @@ def search_in_folder(folder_id, query_string):
     try:
         service = build('drive', 'v3', credentials=creds)
         query = f"'{folder_id}' in parents and name contains '{query_string}' and trashed=false"
-        results = service.files().list(q=query, fields="files(name)").execute()
+        results = service.files().list(
+            q=query,
+            fields="files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, size)"
+        ).execute()
         items = results.get('files', [])
         
-        return [item['name'] for item in items]
+        return [{
+            'name': item['name'],
+            'thumbnailLink': item.get('thumbnailLink', ''),
+            'mimeType': item['mimeType'],
+            'webContentLink': item.get('webContentLink', ''),
+            'webViewLink': item.get('webViewLink', ''),
+            'size': item.get('size', '')
+        } for item in items]
     except HttpError as error:
         print(f'An error occurred: {error}')
         return []
@@ -125,11 +136,18 @@ def search_in_target_folders(query_string):
     for folder_name in target_folders:
         folder_id = get_folder_id(folder_name)
         folder_results = search_in_folder(folder_id, query_string)
-        folder_results_with_name = [f"{folder_name}: {result}" for result in folder_results]
+        folder_results_with_name = [
+            {
+                "folder": folder_name,
+                "file": result  # result is already a dict, no need to parse
+            }
+            for result in folder_results
+        ]
         results.extend(folder_results_with_name)
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"Search in target folders took {execution_time:.2f} seconds")
+    print(results)
     return results
 
 
