@@ -25,9 +25,29 @@ target_folders=[esri_world_imagery_folder_name, sentinel_tif_folder_name, nicfi_
 # Get credentials from Google Drive  
 def get_credentials():
     creds = None
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
+    if os.getenv('ENVIRONMENT') == 'production':
+        # Use environment variables in production
+        token = os.getenv('GOOGLE_TOKEN')
+        refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
+        token_uri = os.getenv('GOOGLE_TOKEN_URI', "https://oauth2.googleapis.com/token")
+        client_id = os.getenv('GOOGLE_CLIENT_ID')
+        client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+        
+        if token and client_id and client_secret:
+            creds = Credentials(
+                token=token,
+                refresh_token=refresh_token,
+                token_uri=token_uri,
+                client_id=client_id,
+                client_secret=client_secret,
+                scopes=SCOPES
+            )
+    else:
+        # Use local file storage in development
+        if os.path.exists('token.pickle'):
+            with open('token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -41,13 +61,15 @@ def get_credentials():
             else:
                 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
                 creds = flow.run_local_server(port=8080)
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
+        
+        if os.getenv('ENVIRONMENT') != 'production':
+            # Only save to file in development
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+
     return creds
 
 # check if the credentials are valid by calling the drive api and print a message 
-
-
 def check_credentials():
     creds = get_credentials()
     service = build('drive', 'v3', credentials=creds)
