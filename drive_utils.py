@@ -1,4 +1,4 @@
-from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -24,31 +24,40 @@ target_folders=[esri_world_imagery_folder_name, sentinel_tif_folder_name, nicfi_
 
 # Get credentials from Google Drive  
 def get_credentials():
+
+    # check the credentials.json exists
+    SERVICE_ACCOUNT_FILE = 'google_drive_credentials.json'
+    token_file = 'token.pickle'
+
     creds = None
-    if os.getenv('ENVIRONMENT') == 'production':
-        # Use environment variables in production
-        token = os.getenv('GOOGLE_TOKEN')
-        refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
-        token_uri = os.getenv('GOOGLE_TOKEN_URI', "https://oauth2.googleapis.com/token")
-        client_id = os.getenv('GOOGLE_CLIENT_ID')
-        client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+    if os.getenv('GAE_ENV', '') == 'standard':
+        # Use google_drive_credentials.json in production
+        print("Current environment is production")
         
-        if token and client_id and client_secret:
-            creds = Credentials(
-                token=token,
-                refresh_token=refresh_token,
-                token_uri=token_uri,
-                client_id=client_id,
-                client_secret=client_secret,
-                scopes=SCOPES
-            )
+        # still using the token.pickle file in production
+        if os.path.exists(token_file):
+            with open(token_file, 'rb') as token:
+                creds = pickle.load(token)
+        else:
+            print("token.pickle not found")
+        
+        
     else:
         # Use local file storage in development
-        if os.path.exists('token.pickle'):
-            with open('token.pickle', 'rb') as token:
+        print("Current environment is development")
+        if os.path.exists(token_file):
+            with open(token_file, 'rb') as token:
                 creds = pickle.load(token)
 
     if not creds or not creds.valid:
+        # check the token is expired
+        if creds and creds.expired and creds.refresh_token:
+            print("Token is expired")
+        else:
+            print("Token is valid")
+    
+
+
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
@@ -56,13 +65,13 @@ def get_credentials():
                 'google_drive_credentials.json',
                 SCOPES
             )
-            if os.getenv('ENVIRONMENT') == 'production':
-                creds = flow.run_console()
+            if os.getenv('GAE_ENV', '') == 'standard':
+                creds = flow.run_local_server(port=0) # TODO: pendding to check if this is working
             else:
                 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
                 creds = flow.run_local_server(port=8080)
         
-        if os.getenv('ENVIRONMENT') != 'production':
+        if os.getenv('GAE_ENV', '') != 'standard':
             # Only save to file in development
             with open('token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
@@ -177,6 +186,7 @@ def search_in_target_folders(query_string):
 # main function to run the script
 def main():
     check_credentials()
+    
     folder_id = get_folder_id('EsriWorldImagery_jpg')
     print(folder_id)
     print(search_in_folder(folder_id, '1822'))
