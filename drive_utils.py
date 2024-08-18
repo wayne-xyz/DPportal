@@ -16,11 +16,12 @@ SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 # folder names
 esri_world_imagery_folder_name="EsriWorldImagery_jpg"
 sentinal_jpg_folder_name="sentinel_jpg"
+nicfi_jpg_folder_name="nicfi_jpg"
 sentinel_tif_folder_name="sentinel_tif_2024"
 nicfi_folder_name="nicfi_tif_2024"
 
 # target folders
-target_folders=[esri_world_imagery_folder_name,sentinal_jpg_folder_name, sentinel_tif_folder_name, nicfi_folder_name]
+target_folders=[esri_world_imagery_folder_name,sentinal_jpg_folder_name, nicfi_jpg_folder_name, sentinel_tif_folder_name, nicfi_folder_name]
 
 # for the google drive api, 
 ALLOWED_EMAIL='qinheyi@gmail.com' ,
