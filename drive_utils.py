@@ -3,10 +3,11 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
+from google.auth.exceptions import RefreshError
 import pickle
 import time
 import os.path
-import json
+
 
 os.environ['GOOGLE_DRIVE_CREDENTIALS'] = 'google_drive_credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -14,15 +15,24 @@ SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
 # folder names
 esri_world_imagery_folder_name="EsriWorldImagery_jpg"
+sentinal_jpg_folder_name="sentinel_jpg"
 sentinel_tif_folder_name="sentinel_tif_2024"
 nicfi_folder_name="nicfi_tif_2024"
 
 # target folders
-target_folders=[esri_world_imagery_folder_name, sentinel_tif_folder_name, nicfi_folder_name]
+target_folders=[esri_world_imagery_folder_name,sentinal_jpg_folder_name, sentinel_tif_folder_name, nicfi_folder_name]
+
+# for the google drive api, 
+ALLOWED_EMAIL='qinheyi@gmail.com' ,
 
 
 
-# Get credentials from Google Drive  
+
+
+
+# Get credentials from Google Drive :
+# 1. Using the development environment, the token.pickle file will be used, upload the token.pickle file to Cloud
+# 2. If the token is expired, local server will be used to get the token then upload the token.pickle file to Cloud
 def get_credentials():
 
     # check the credentials.json exists
@@ -50,23 +60,20 @@ def get_credentials():
                 creds = pickle.load(token)
 
     if not creds or not creds.valid:
-        # check the token is expired
         if creds and creds.expired and creds.refresh_token:
-            print("Token is expired")
-        else:
-            print("Token is valid")
-    
-
-
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                print("Token refresh failed. Creating new token.")
+                creds = None
+        
+        if not creds:
             flow = InstalledAppFlow.from_client_secrets_file(
                 'google_drive_credentials.json',
                 SCOPES
             )
             if os.getenv('GAE_ENV', '') == 'standard':
-                creds = flow.run_local_server(port=0) # TODO: pendding to check if this is working
+                creds = flow.run_local_server(port=0)
             else:
                 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
                 creds = flow.run_local_server(port=8080)
