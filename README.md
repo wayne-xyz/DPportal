@@ -5,7 +5,7 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 ## Developing ToDo List
 - [ ] Support search by name of dumpsite ( auto-complete typing)
-- [ ] migrate all the jpeg files from OneDrive to Google Drive 
+- [X] migrate all the jpeg files from OneDrive to Google Drive 
 - [ ] Monthly update of jpeg files and tif files collection functionality, both nicfi and sentinel
 - [ ] Map viewer functionality
 - [ ] Long term authentication for Google Drive API, limitation for user
