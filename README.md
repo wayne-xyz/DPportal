@@ -52,7 +52,18 @@ After updating the code, deploy the app:
 gcloud app deploy
 ```
 
+
+```
+gcloud app deploy --promote --version=YOUR_VERSION_ID
+```
+
 Monitor the app's logs:
 ```
 gcloud app logs tail -s default
+```
+
+3. Deploied app versions list command
+```
+gcloud app versions list
+
 ```
