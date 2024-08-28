@@ -43,8 +43,19 @@ function parseCSV(csvText) {
 // Function to get autocomplete suggestions
 function getAutocompleteSuggestions(input) {
     if (input.length < 2) return [];
+    
+    const isNumeric = /^\d+$/.test(input);
+    
     return csvData
-        .filter(item => item.Index && item.Index.toLowerCase().startsWith(input.toLowerCase()))
+        .filter(item => {
+            if (isNumeric) {
+                // If input is numeric, search in Index
+                return item.Index && item.Index.toLowerCase().startsWith(input.toLowerCase());
+            } else {
+                // If input is text, search in DEN_BOT
+                return item.DEN_BOT && item.DEN_BOT.toLowerCase().includes(input.toLowerCase());
+            }
+        })
         .map(item => ({Index: item.Index, DEN_BOT: item.DEN_BOT}))
         .slice(0, 5); // Limit to 5 suggestions
 }
