@@ -1,0 +1,6 @@
+cron:
+  - name: update_task
+    description: "Update the file task"
+    url: /update_task
+    schedule: every 1 minutes
+    timezone: UTC

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 from drive_utils import search_in_target_folders
+from update_task import download_tif_file
 
 app = Flask(__name__, static_folder='static')
 
@@ -34,6 +35,13 @@ def search():
     ]
 
     return jsonify(formatted_results)
+
+
+@app.route('/update_task')
+def update_task():
+    download_tif_file()
+    return jsonify({'status': 'success'})
+
 
 
 if __name__ == '__main__':
