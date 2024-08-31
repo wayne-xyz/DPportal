@@ -34,7 +34,7 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 5. Create a new OAuth 2.0 client ID and download the JSON key file
 6. Set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to the path of the JSON key file
 7. Hide the JSON key file by adding it to .gitignore (google_drive_credentials.json)
-
+8. Enable the Cloud Scheduler API for the projects
 
 
 
@@ -62,8 +62,19 @@ Monitor the app's logs:
 gcloud app logs tail -s default
 ```
 
+Monitor the app's Logs on certain version
+```
+gcloud app logs tail -s default --version=YOUR_VERSION_ID
+```
+
+
 3. Deploied app versions list command
 ```
 gcloud app versions list
 
+```
+
+4. Deploy cron.yaml (manual update the schedule time and task)
+```
+gcloud app deploy cron.yaml
 ```
