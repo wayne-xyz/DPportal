@@ -1,7 +1,12 @@
 import datetime
 
+
+
+
+
 def download_tif_file():
     # print the current date and time
+
     print(datetime.datetime.now())
 
 

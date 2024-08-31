@@ -34,7 +34,7 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 5. Create a new OAuth 2.0 client ID and download the JSON key file
 6. Set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to the path of the JSON key file
 7. Hide the JSON key file by adding it to .gitignore (google_drive_credentials.json)
-8. Enable the Cloud Scheduler API for the projects
+8. Enable the Cloud Scheduler API for the projects, seeting in the Cloud Scheduler UI
 
 
 

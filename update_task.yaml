@@ -1,0 +1,4 @@
+# parameters for the update file task( download the tif file)
+
+# path to save the tif file
+drive_path: "/dev_test"
