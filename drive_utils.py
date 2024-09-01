@@ -4,9 +4,9 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 from google.auth.exceptions import RefreshError
-import pickle
+
 import time
-import os.path
+
 
 
 
@@ -37,9 +37,7 @@ def test_service_account_key_file():
 
 
 
-# Get credentials from Google Drive :
-# 1. Using the development environment, the token.pickle file will be used, upload the token.pickle file to Cloud
-# 2. If the token is expired, local server will be used to get the token then upload the token.pickle file to Cloud
+# use service account key file to get the credentials
 def get_credentials():
     # using the service account key file
     creds = service_account.Credentials.from_service_account_file(DRIVE_GEE_KEY_FILE,scopes=SCOPES)
