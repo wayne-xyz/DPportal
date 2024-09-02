@@ -1,4 +1,6 @@
 # parameters for the update file task( download the tif file)
 
-# path to save the tif file
+# path to save the tif file, when in dev mode, save in the dev_test folder, when in prod mode, save in the Images folder
 drive_path: "/dev_test"
+nicfi_folder_name: "nicfi_tif_2024"
+sentinel_folder_name: "sentinel_tif_2024"

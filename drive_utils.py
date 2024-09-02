@@ -4,14 +4,16 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 from google.auth.exceptions import RefreshError
-import pickle
+
 import time
-import os.path
 
 
-os.environ['GOOGLE_DRIVE_CREDENTIALS'] = 'google_drive_credentials.json'
+
+
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
+# service account key file
+DRIVE_GEE_KEY_FILE = 'stone-armor-430205-e2-2cd696d4afcd.json'
 
 # folder names
 esri_world_imagery_folder_name="EsriWorldImagery_jpg"
@@ -23,67 +25,22 @@ nicfi_folder_name="nicfi_tif_2024"
 # target folders
 target_folders=[esri_world_imagery_folder_name,sentinal_jpg_folder_name, nicfi_jpg_folder_name, sentinel_tif_folder_name, nicfi_folder_name]
 
-# for the google drive api, 
-ALLOWED_EMAIL='qinheyi@gmail.com' ,
+
+
+def test_service_account_key_file():
+    creds = service_account.Credentials.from_service_account_file(DRIVE_GEE_KEY_FILE,scopes=SCOPES)
+    # build the drive service
+    drive_service = build('drive', 'v3', credentials=creds)
+    # get the folders' names
+    results = drive_service.files().list(q="mimeType='application/vnd.google-apps.folder'", spaces='drive', fields='nextPageToken, files(id, name)').execute()
+    print(results)
 
 
 
-
-
-
-# Get credentials from Google Drive :
-# 1. Using the development environment, the token.pickle file will be used, upload the token.pickle file to Cloud
-# 2. If the token is expired, local server will be used to get the token then upload the token.pickle file to Cloud
+# use service account key file to get the credentials
 def get_credentials():
-
-    # check the credentials.json exists
-    SERVICE_ACCOUNT_FILE = 'google_drive_credentials.json'
-    token_file = 'token.pickle'
-
-    creds = None
-    if os.getenv('GAE_ENV', '') == 'standard':
-        # Use google_drive_credentials.json in production
-        print("Current environment is production")
-        
-        # still using the token.pickle file in production
-        if os.path.exists(token_file):
-            with open(token_file, 'rb') as token:
-                creds = pickle.load(token)
-        else:
-            print("token.pickle not found")
-        
-        
-    else:
-        # Use local file storage in development
-        print("Current environment is development")
-        if os.path.exists(token_file):
-            with open(token_file, 'rb') as token:
-                creds = pickle.load(token)
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            try:
-                creds.refresh(Request())
-            except RefreshError:
-                print("Token refresh failed. Creating new token.")
-                creds = None
-        
-        if not creds:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'google_drive_credentials.json',
-                SCOPES
-            )
-            if os.getenv('GAE_ENV', '') == 'standard':
-                creds = flow.run_local_server(port=0)
-            else:
-                os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-                creds = flow.run_local_server(port=8080)
-        
-        if os.getenv('GAE_ENV', '') != 'standard':
-            # Only save to file in development
-            with open('token.pickle', 'wb') as token:
-                pickle.dump(creds, token)
-
+    # using the service account key file
+    creds = service_account.Credentials.from_service_account_file(DRIVE_GEE_KEY_FILE,scopes=SCOPES)
     return creds
 
 # check if the credentials are valid by calling the drive api and print a message 
@@ -102,6 +59,8 @@ def check_credentials():
     execution_time = end_time - start_time
     
     print(f"Found {folder_count} folders")
+    # print the folder names, only the name
+    print(f"Folders: {[folder['name'] for folder in results.get('files', [])]}")
     print(f"Query took {execution_time:.2f} seconds")
 
 
@@ -186,7 +145,8 @@ def search_in_target_folders(query_string):
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"Search in target folders took {execution_time:.2f} seconds")
-    print(results)
+    # print the length of the results
+    print(f"Found {len(results)} results")
     return results
 
 
@@ -213,8 +173,7 @@ def check_folder_date_range(folder_name):
 
 
 
-# main function to run the script
-def main():
+def test_credentials():
     check_credentials()
     
     # folder_id = get_folder_id('EsriWorldImagery_jpg')
@@ -228,6 +187,12 @@ def main():
     # print(search_in_folder(folder_id_nicfi, '1822'))
 
     check_folder_date_range(sentinel_tif_folder_name)
+
+# main function to run the script
+def main():
+    test_credentials()
+
+
 
 if __name__ == '__main__':
     main()
