@@ -37,7 +37,8 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 8. Enable the Cloud Scheduler API for the projects, seeting in the Cloud Scheduler UI
 9. Non-commericial use of the Earth Engine is free, [earth engine](https://earthengine.google.com/noncommercial/)
 10. Register a New Earth Engine project, and add it to current app engine project [add EE project](https://code.earthengine.google.com/register)
-
+11. Access the nicfi data on EE, [nicfi](https://developers.planet.com/docs/integrations/gee/nicfi/)
+12. Cloud console IAM & Admin, add the Earth Engine Resource Admin role to the service account.
 
 
 ### Deployment
