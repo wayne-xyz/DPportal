@@ -190,20 +190,44 @@ def search_in_target_folders(query_string):
     return results
 
 
+# function to check the folder  and return the date range based on the file name for nicfi folder: INDEX-YYYYMMDD-nicfi.tif, sentinel:INDEX-YYYYMMDD-sentinel.tif
+def check_folder_date_range(folder_name):
+    folder_id = get_folder_id(folder_name)
+    files = search_in_folder(folder_id, '')
+
+    dates = []
+    for file in files:
+        name_parts = file['name'].split('-')
+        if len(name_parts) >= 2:
+            date_str = name_parts[1]
+            if date_str.isdigit() and len(date_str) == 8:
+                dates.append(date_str)
+
+    if dates:
+        date_range = f"{min(dates)}-{max(dates)}"
+        print(f"Folder Date Range: {date_range}")
+    else:
+        print("No valid dates found in folder")
+
+# Example usage
+
+
 
 # main function to run the script
 def main():
     check_credentials()
     
-    folder_id = get_folder_id('EsriWorldImagery_jpg')
-    print(folder_id)
-    print(search_in_folder(folder_id, '1822'))
-    folder_id_sentinel=get_folder_id(sentinel_tif_folder_name)
-    print(folder_id_sentinel)
-    print(search_in_folder(folder_id_sentinel, '1822'))
-    folder_id_nicfi=get_folder_id(nicfi_folder_name)
-    print(folder_id_nicfi)
-    print(search_in_folder(folder_id_nicfi, '1822'))
+    # folder_id = get_folder_id('EsriWorldImagery_jpg')
+    # print(folder_id)
+    # print(search_in_folder(folder_id, '1822'))
+    # folder_id_sentinel=get_folder_id(sentinel_tif_folder_name)
+    # print(folder_id_sentinel)
+    # print(search_in_folder(folder_id_sentinel, '1822'))
+    # folder_id_nicfi=get_folder_id(nicfi_folder_name)
+    # print(folder_id_nicfi)
+    # print(search_in_folder(folder_id_nicfi, '1822'))
+
+    check_folder_date_range(sentinel_tif_folder_name)
 
 if __name__ == '__main__':
     main()
