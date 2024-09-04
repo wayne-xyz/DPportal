@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 from drive_utils import search_in_target_folders
 from update_task import download_tif_file
+from drive_utils import rewrite_update_log
+
 
 app = Flask(__name__, static_folder='static')
 
@@ -42,7 +44,10 @@ def update_task():
     download_tif_file()
     return jsonify({'status': 'success'})
 
-
+@app.route('/update_log')
+def update_log():
+    rewrite_update_log()
+    return jsonify({'status': 'success'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)

@@ -153,7 +153,7 @@ def search_in_target_folders(query_string):
 # function to check the folder  and return the date range based on the file name for nicfi folder: INDEX-YYYYMMDD-nicfi.tif, sentinel:INDEX-YYYYMMDD-sentinel.tif
 def check_folder_date_range(folder_name):
     folder_id = get_folder_id(folder_name)
-    files = search_in_folder(folder_id, '')
+    files = search_in_folder(folder_id, '1822')
 
     dates = []
     for file in files:
@@ -164,12 +164,20 @@ def check_folder_date_range(folder_name):
                 dates.append(date_str)
 
     if dates:
-        date_range = f"{min(dates)}-{max(dates)}"
-        print(f"Folder Date Range: {date_range}")
+        # print the date range
+        print(f"Date range of {folder_name}: {min(dates)}-{max(dates)}")
+        return f"{min(dates)}-{max(dates)}"
     else:
-        print("No valid dates found in folder")
+        return "No valid dates found"
 
-# Example usage
+# write down the Date range of the two folders in the static log file
+def rewrite_update_log():
+    # save the logfile in the static folder
+    with open('static/update_log.txt', 'w') as log_file:
+        sentinel_range = check_folder_date_range(sentinal_jpg_folder_name)
+        nicfi_range = check_folder_date_range(nicfi_jpg_folder_name)
+        log_file.write(f"Date range of {sentinal_jpg_folder_name}: {sentinel_range}\n")
+        log_file.write(f"Date range of {nicfi_jpg_folder_name}: {nicfi_range}\n")
 
 
 
@@ -186,7 +194,7 @@ def test_credentials():
     # print(folder_id_nicfi)
     # print(search_in_folder(folder_id_nicfi, '1822'))
 
-    check_folder_date_range(sentinel_tif_folder_name)
+    rewrite_update_log()
 
 # main function to run the script
 def main():
