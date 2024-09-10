@@ -13,6 +13,12 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 
+## Update Log
+- 2024/9/10
+    - Test the update_log function, which will update the update_log.txt file.
+    - reorder the target_folders in drive_utils.py, to shows the folder's order in correct way.
+
+
 
 ## Version 1.0 Features 
 - Search for files in Google Drive, by the index number of dumpsite.

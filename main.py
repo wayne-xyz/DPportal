@@ -38,7 +38,7 @@ def search():
 
     return jsonify(formatted_results)
 
-
+# using the cron.yaml to run the update_task function
 @app.route('/update_task')
 def update_task():
     download_tif_file()
