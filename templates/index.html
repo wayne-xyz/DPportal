@@ -6,7 +6,11 @@
     <title>Búsqueda de Imágenes Satelitales de Áreas Degradadas en Perú</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="{{ url_for('static', filename='csv_handler.js') }}"></script>
+    <script src="{{ url_for('static', filename='csv_handler.js') }}"></script>  
+    <script src="{{ url_for('static', filename='mapview.js') }}" defer></script>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.30/"></script>
+
     <style>
         body {
             margin-bottom: 60px; /* Adjust this value based on your footer height */
@@ -21,6 +25,14 @@
             padding: 10px 0;
             z-index: 1000;
         }
+        #map {
+            height: 400px; /* Adjust the height as needed */
+            width: 100%;
+            margin-top: 20px;
+        }
+        .hidden-map {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -29,7 +41,8 @@
         <h1>Búsqueda de Imágenes Satelitales de Áreas Degradadas en Perú</h1>
         <input type="text" id="searchInput" placeholder="Tipee el código de su botadero/área degradada" class="search-bar" required>
         <button onclick="performSearch()" class="search-button">Buscar</button>
-    
+        <!-- Esri SDK Map viewer     -->
+        <div id="map" class="hidden-map"></div>
         <div id="results" class="results" style="max-height: 600px; overflow-y: auto; margin-top: 20px;">
             <!-- Search results will be updated here -->
         </div>
