@@ -10,12 +10,13 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 - [ ] Map viewer functionality
 - [X] Long term authentication for Google Drive API, limitation for user
 - [ ] Zip downloading functionality
-
+- [ ] UI and Description update, more readable and user-friendly
 
 
 ## Update Log
 - 2024/9/18
     - add new dev branch for the UI and Map viewer
+    - Update the UI, multiple column by folder and groups
 
 
 - 2024/9/10
