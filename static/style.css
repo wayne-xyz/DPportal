@@ -1,9 +1,9 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     height: 100vh;
-    margin: 0;
+    margin-top: 5vh;
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
 }
@@ -12,6 +12,7 @@ body {
     text-align: center;
     width: 100%;
     max-width: 600px;
+    
 }
 
 .search-container h1 {
