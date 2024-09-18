@@ -33,21 +33,24 @@
         .hidden-map {
             display: none;
         }
+
     </style>
 </head>
 <body>
 
-    <div class="search-container">
-        <h1>Búsqueda de Imágenes Satelitales de Áreas Degradadas en Perú</h1>
-        <input type="text" id="searchInput" placeholder="Tipee el código de su botadero/área degradada" class="search-bar" required>
-        <button onclick="performSearch()" class="search-button">Buscar</button>
-        <!-- Esri SDK Map viewer     -->
-        <div id="map" class="hidden-map"></div>
-        <div id="results" class="results" style="max-height: 600px; overflow-y: auto; margin-top: 20px;">
-            <!-- Search results will be updated here -->
+    <div class="main-container">
+        <div class="search-container">
+            <h1>Búsqueda de Imágenes Satelitales de Áreas Degradadas en Perú</h1>
+            <input type="text" id="searchInput" placeholder="Tipee el código de su botadero/área degradada" class="search-bar" required>
+            <button onclick="performSearch()" class="search-button">Buscar</button>
+        </div>
+        <div class="map-results-container">
+            <div id="map" class="hidden-map" ></div>
+            <div id="results" class="results" style="max-height: 600px; overflow-y: auto; margin-top: 20px;">
+                <!-- Search results will be updated here -->
+            </div>
         </div>
     </div>
-    
     <footer>
         <div id="updateInfo"></div>
     </footer>

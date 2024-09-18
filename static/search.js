@@ -6,7 +6,7 @@ async function performSearch() {
     resultsContainer.innerHTML = '';
 
     // Show loading message
-    resultsContainer.innerHTML = '<p>Searching...</p>';
+    resultsContainer.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100%;"><p>Searching...</p></div>';
 
     try {
         // Make a Fetch API call to your backend
@@ -55,7 +55,6 @@ async function performSearch() {
             resultsContainer.innerHTML = '<p>No results found.</p>';
             return;
         }
-
         // Group results by folder
         const groupedResults = parsedData.reduce((acc, item) => {
             if (!acc[item.folder]) {
@@ -65,8 +64,21 @@ async function performSearch() {
             return acc;
         }, {});
 
-        // Display grouped results
+        // Create a container for all columns
+        const columnsContainer = document.createElement('div');
+        columnsContainer.className = 'columns-container';
+        columnsContainer.style.display = 'flex';
+        columnsContainer.style.flexDirection = 'row';
+        columnsContainer.style.justifyContent = 'space-between';
+        resultsContainer.appendChild(columnsContainer);
+
+        // Display grouped results in columns
         Object.entries(groupedResults).forEach(([folder, items]) => {
+            const columnElement = document.createElement('div');
+            columnElement.className = 'result-column';
+            columnElement.style.flex = '1';
+            columnElement.style.marginRight = '20px';
+            
             const folderElement = document.createElement('div');
             folderElement.className = 'folder-group';
             folderElement.innerHTML = `
@@ -112,7 +124,8 @@ async function performSearch() {
                 folderItems.appendChild(resultElement);
             });
 
-            resultsContainer.appendChild(folderElement);
+            columnElement.appendChild(folderElement);
+            columnsContainer.appendChild(columnElement);
         });
 
     } catch (error) {

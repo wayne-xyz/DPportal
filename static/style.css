@@ -7,6 +7,50 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
 }
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    justify-content: flex-start; /* Align to the top */
+    height: 100vh; /* This makes the container take up the full viewport height */
+    width: 100%;
+    padding-top: 5vh; /* Add some top padding */
+}
+
+.search-container {
+    flex: 0 0 auto; /* This prevents the search container from growing or shrinking */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px; /* Add some space below */
+}
+
+.map-results-container {
+    flex: 1 1 auto;
+    display: flex; /* Add this */
+    flex-direction: row; /* Add this */
+    justify-content: space-between; /* Add this */
+    width: 100%;
+    max-width: 2048px;
+    overflow: hidden; /* Change from overflow-y: auto */
+}
+
+#map {
+    flex: 1; /* Add this */
+    height: 600px; /* Add this or adjust as needed */
+    margin-right: 20px; /* Add some space between map and results */
+    max-width: 600px;
+}
+
+#results {
+    flex: 1; /* Add this */
+    overflow-y: auto;
+    max-height: 600px;
+    margin-top: 0; /* Remove top margin */
+}
 
 .search-container {
     text-align: center;
@@ -97,8 +141,6 @@ body {
     display: flex;
 
 }
-
-
 
 .file-name {
     margin-right: 10px;
