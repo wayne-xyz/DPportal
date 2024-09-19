@@ -52,13 +52,6 @@ body {
     margin-top: 0; /* Remove top margin */
 }
 
-.search-container {
-    text-align: center;
-    width: 100%;
-    max-width: 600px;
-    
-}
-
 .search-container h1 {
     font-size: 2.5rem;
     margin-bottom: 20px;
