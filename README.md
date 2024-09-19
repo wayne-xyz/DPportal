@@ -14,6 +14,10 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Update Log
+- 2024/9/19
+    - revise the folder's name and description
+
+
 - 2024/9/18
     - add new dev branch for the UI and Map viewer
     - Update the UI, multiple column by folder and groups
