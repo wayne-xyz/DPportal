@@ -19,6 +19,36 @@ function loadMapping(callback) {
     xhr.send();
 }
 
+// Function to add hover text
+function addHoverText(element, hoverText) {
+    const hoverElement = document.createElement('span');
+    hoverElement.className = 'hover-text';
+    hoverElement.innerHTML = hoverText; // Use innerHTML to support HTML content
+    hoverElement.style.position = 'absolute';
+    hoverElement.style.backgroundColor = '#333';
+    hoverElement.style.color = '#fff';
+    hoverElement.style.padding = '5px';
+    hoverElement.style.borderRadius = '5px';
+    hoverElement.style.whiteSpace = 'normal'; // Allow text to wrap
+    hoverElement.style.visibility = 'hidden';
+    hoverElement.style.opacity = '0';
+    hoverElement.style.transition = 'opacity 0.3s';
+    hoverElement.style.maxWidth = '400px'; // Optional: limit the width of the hover text
+
+    element.style.position = 'relative';
+    element.appendChild(hoverElement);
+
+    element.addEventListener('mouseenter', () => {
+        hoverElement.style.visibility = 'visible';
+        hoverElement.style.opacity = '1';
+    });
+
+    element.addEventListener('mouseleave', () => {
+        hoverElement.style.visibility = 'hidden';
+        hoverElement.style.opacity = '0';
+    });
+}
+
 // Define performSearch as a global function
 window.performSearch = function() {
     loadMapping(async function(strMapping) {
@@ -111,10 +141,13 @@ window.performSearch = function() {
 
                 folderElement.innerHTML = `
                     <h3 class="folder-name">${displayName}</h3>
-                    <p class="folder-description">${description}</p>
                     <div class="folder-items">
                     </div>
                 `;
+
+                // Add hover text to the folder name
+                const folderNameElement = folderElement.querySelector('.folder-name');
+                addHoverText(folderNameElement, description);
 
                 items.forEach(item => {
                     const resultElement = document.createElement('div');
