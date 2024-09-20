@@ -155,7 +155,7 @@ window.performSearch = function() {
                     let contentHTML = `
                         <div class="result-content">
                             <div class="file-info">
-                                <p class="file-name">${item.name}</p>
+                                <p class="file-name small-text">${item.name}</p>
                                 <div class="action-icons">`;
 
                     if (item.webViewLink && item.name.toLowerCase().endsWith('.jpg')) {

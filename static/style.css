@@ -24,7 +24,7 @@ body {
     align-items: center; /* Center content horizontally */
     text-align: center;
     width: 100%;
-    max-width: 600px;
+    max-width: 1300px;
     margin-bottom: 20px; /* Add some space below */
 }
 
@@ -58,7 +58,7 @@ body {
 }
 
 .search-bar {
-    width: 100%;
+    width: 60%;
     padding: 15px;
     font-size: 1.5rem;
     border-radius: 30px;
@@ -164,4 +164,8 @@ body {
 
 .icon-button:hover {
     background-color: #e0e0e0;
+}
+
+.small-text {
+    font-size: 0.9em;
 }
