@@ -149,7 +149,7 @@ window.performSearch = function() {
                 const folderNameElement = folderElement.querySelector('.folder-name');
                 addHoverText(folderNameElement, description);
 
-                items.forEach(item => {
+                items.forEach((item, index) => {
                     const resultElement = document.createElement('div');
                     resultElement.className = 'search-result';
                     let contentHTML = `
@@ -178,7 +178,20 @@ window.performSearch = function() {
                         </div>`;
 
                     if (item.thumbnailLink && item.name.toLowerCase().endsWith('.jpg')) {
-                        contentHTML += `<img src="${item.thumbnailLink}" alt="${item.name}" class="thumbnail">`;
+                        const match = item.name.match(/(\d+)-(\d{4})(\d{2})(\d{2})/);
+                        let formattedText = '';
+                        if (match) {
+                            const [, index, year, month, day] = match;
+                            const date = new Date(year, month - 1, day);
+                            const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                            formattedText = `${index} - ${formattedDate}`;
+                        }
+
+                        contentHTML += `
+                            <div class="thumbnail-container" style="display: flex; align-items: center;">
+                                <img src="${item.thumbnailLink}" alt="${item.name}" class="thumbnail" style="margin-right: 10px;">
+                                <span class="file-info-text">${formattedText}</span>
+                            </div>`;
                     }
 
                     resultElement.innerHTML = contentHTML;
