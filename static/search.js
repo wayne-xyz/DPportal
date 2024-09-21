@@ -117,28 +117,63 @@ window.performSearch = function() {
                 return acc;
             }, {});
 
+            // Create a container for the toggle button and columns
+            const resultsWrapper = document.createElement('div');
+            resultsWrapper.className = 'results-wrapper';
+            resultsWrapper.style.display = 'flex';
+            resultsWrapper.style.flexDirection = 'column';
+            resultsWrapper.style.position = 'relative';  // Add this line
+            resultsContainer.appendChild(resultsWrapper);
+
+            // Create a button to toggle expanded view
+            const toggleButton = document.createElement('button');
+            toggleButton.textContent = 'Show TIFF files';
+            toggleButton.style.position = 'absolute';
+            toggleButton.style.top = '0';
+            toggleButton.style.right = '0';
+            toggleButton.style.zIndex = '1';
+            resultsWrapper.appendChild(toggleButton);
+
+            // Create a scrollable container for columns
+            const scrollContainer = document.createElement('div');
+            scrollContainer.className = 'scroll-container';
+            scrollContainer.style.overflowX = 'hidden';
+            scrollContainer.style.width = '100%';
+            scrollContainer.style.marginTop = '40px';  // Add space for the button
+            resultsWrapper.appendChild(scrollContainer);
+
             // Create a container for all columns
             const columnsContainer = document.createElement('div');
             columnsContainer.className = 'columns-container';
             columnsContainer.style.display = 'flex';
             columnsContainer.style.flexDirection = 'row';
-            columnsContainer.style.justifyContent = 'space-between';
-            resultsContainer.appendChild(columnsContainer);
+            columnsContainer.style.justifyContent = 'flex-start';
+            columnsContainer.style.flexWrap = 'nowrap';
+            columnsContainer.style.minWidth = '100%';
+            scrollContainer.appendChild(columnsContainer);
+
+            let isExpanded = false;
 
             // Display grouped results in columns
-            Object.entries(groupedResults).forEach(([folder, items]) => {
+            Object.entries(groupedResults).forEach(([folder, items], index) => {
                 const columnElement = document.createElement('div');
                 columnElement.className = 'result-column';
-                columnElement.style.flex = '1';
+                columnElement.style.flex = '0 0 calc(33.33% - 20px)';
                 columnElement.style.marginRight = '20px';
+                columnElement.style.marginBottom = '20px';
                 
-                const folderElement = document.createElement('div');
-                folderElement.className = 'folder-group';
-                
+                if (index >= Object.keys(groupedResults).length - 2) {
+                    columnElement.style.display = 'none';
+                    columnElement.classList.add('collapsed-column');
+                }
+
                 // Use the mapping to get the display name and description
                 const displayName = strMapping[folder] || folder;
                 const description = strMapping[`${folder} description`] || '';
 
+                const folderElement = document.createElement('div');
+                folderElement.className = 'folder-group';
+                
                 folderElement.innerHTML = `
                     <h3 class="folder-name">${displayName}</h3>
                     <div class="folder-items">
@@ -200,6 +235,22 @@ window.performSearch = function() {
 
                 columnElement.appendChild(folderElement);
                 columnsContainer.appendChild(columnElement);
+            });
+
+            // Add click event listener to toggle button
+            toggleButton.addEventListener('click', () => {
+                isExpanded = !isExpanded;
+                const collapsedColumns = columnsContainer.querySelectorAll('.collapsed-column');
+                collapsedColumns.forEach((column) => {
+                    column.style.display = isExpanded ? 'block' : 'none';
+                });
+                scrollContainer.style.overflowX = isExpanded ? 'auto' : 'hidden';
+                toggleButton.textContent = isExpanded ? 'Show JPG files' : 'Show TIFF files';
+
+                // Scroll to the right when expanded
+                if (isExpanded) {
+                    scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+                }
             });
 
         } catch (error) {
