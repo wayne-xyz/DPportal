@@ -15,8 +15,10 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 ## Update Log
 - 2024/9/20
+    - alpha branch released online versionID: [20240812t152105](https://20240812t152105-dot-stone-armor-430205-e2.uc.r.appspot.com/)
     - add new alpha branch for a new Dev status, for showing the ready Version 
     - Collapsed the search results and make the search results more flexible 
+
 
 - 2024/9/19
     - add the date lable for the result items 
@@ -76,8 +78,14 @@ After updating the code, deploy the app:
 gcloud app deploy
 ```
 
-
+3. Deploied app versions list command
 ```
+gcloud app versions list
+```
+
+4. Deploy the specific version
+```
+
 gcloud app deploy --promote --version=YOUR_VERSION_ID
 ```
 
@@ -92,13 +100,8 @@ gcloud app logs tail -s default --version=YOUR_VERSION_ID
 ```
 
 
-3. Deploied app versions list command
-```
-gcloud app versions list
 
-```
-
-4. Deploy cron.yaml (manual update the schedule time and task)
+Deploy cron.yaml (manual update the schedule time and task)
 ```
 gcloud app deploy cron.yaml
 ```
