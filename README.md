@@ -14,9 +14,15 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Update Log
+- 2024/9/20
+    - add new alpha branch for a new Dev status, for showing the ready Version 
+    - Collapsed the search results and make the search results more flexible 
+
 - 2024/9/19
+    - add the date lable for the result items 
     - revise the folder's name and description
     - add super link for the description
+
 
 - 2024/9/18
     - add new dev branch for the UI and Map viewer
