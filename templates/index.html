@@ -23,7 +23,7 @@
             z-index: 1000;
         }
         #map {
-            height: 400px; /* Adjust the height as needed */
+            height: 800px; /* Adjust the height as needed */
             width: 100%;
             margin-top: 20px;
         }
@@ -40,10 +40,11 @@
             <button onclick="performSearch()" class="search-button">Buscar</button>
         </div>
         <div class="map-results-container">
-            <div id="map" class="hidden-map" ></div>
+
             <div id="results" class="results" style="max-height: 600px; overflow-y: auto; margin-top: 20px;">
                 <!-- Search results will be updated here -->
             </div>
+            <div id="map" class="hidden-map" ></div>
         </div>
     </div>
     <footer>
