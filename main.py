@@ -16,6 +16,13 @@ def get_csv():
     csv_path = os.path.join(app.static_folder, 'data', 'Shapefile_data_20240819.csv')
     return send_from_directory(os.path.dirname(csv_path), os.path.basename(csv_path))
 
+
+@app.route('/data_statics')
+def data_statics():
+    return render_template('data_statics.html')
+
+
+
 @app.route('/search', methods=['GET'])
 def search():
     query = request.args.get('query', '')
