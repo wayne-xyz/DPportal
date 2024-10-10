@@ -3,7 +3,9 @@ import os
 from drive_utils import search_in_target_folders
 from update_task import download_tif_file
 from drive_utils import rewrite_update_log
+from drive_utils import perform_saving_static_data
 import json
+
 
 
 app = Flask(__name__, static_folder='static')
@@ -16,6 +18,16 @@ def hello():
 def get_csv():
     csv_path = os.path.join(app.static_folder, 'data', 'Shapefile_data_20240819.csv')
     return send_from_directory(os.path.dirname(csv_path), os.path.basename(csv_path))
+
+
+@app.route('/data_statics')
+def data_statics():
+    perform_saving_static_data()
+    return render_template('data_statics.html')
+
+
+
+
 
 @app.route('/search', methods=['GET'])
 def search():

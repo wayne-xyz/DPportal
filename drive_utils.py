@@ -4,6 +4,10 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 from google.auth.exceptions import RefreshError
+import csv
+from collections import defaultdict
+import re
+import os
 
 import time
 
@@ -25,6 +29,12 @@ nicfi_folder_name="nicfi_tif_2024"
 # target folders
 target_folders=[esri_world_imagery_folder_name, nicfi_jpg_folder_name, sentinal_jpg_folder_name, sentinel_tif_folder_name, nicfi_folder_name]
 
+static_folder_name=[nicfi_folder_name,nicfi_jpg_folder_name,sentinel_tif_folder_name,sentinal_jpg_folder_name]
+
+
+def is_production():
+    # Google App Engine sets this environment variable in the production environment
+    return os.getenv('GAE_ENV', '').startswith('standard')
 
 
 def test_service_account_key_file():
@@ -179,6 +189,88 @@ def rewrite_update_log():
         log_file.write(f"Date range of {sentinal_jpg_folder_name}: {sentinel_range}\n")
         log_file.write(f"Date range of {nicfi_jpg_folder_name}: {nicfi_range}\n")
 
+
+# get all the files names by folder name or list of folder names from Google Drive
+def get_all_files_names(folder_names):
+    all_files = {}
+    if isinstance(folder_names, str):
+        folder_names = [folder_names]
+    
+    for folder_name in folder_names:
+        folder_id = get_folder_id(folder_name)
+        files = search_in_folder(folder_id, '')
+        all_files[folder_name] = [file['name'] for file in files]
+    
+    return all_files
+
+
+# save the static data to the csv file
+def perform_saving_static_data():
+    # save the all_files to the csv file
+    all_files_dict = get_all_files_names(static_folder_name)
+
+    if is_production()==False:
+        print(all_files_dict)
+
+
+    # Define the CSV file path
+    output_csv = 'static/data/static_data.csv'
+        # Dictionary to store the aggregated data
+    result = defaultdict(lambda: defaultdict(int))
+
+   # Regular expressions for matching the two formats
+    regex_format_1 = re.compile(r'\d{3,6}-\d{4}-\d{2}-.*\.(tif|jpg)')
+    regex_format_2 = re.compile(r'\d{3,6}-\d{6}-.*\.(tif|jpg)')
+
+    # Process each folder and its files
+    for folder, files in all_files_dict.items():
+        for file in files:
+            try:
+                # Check if the file matches the first format: index-YYYY-MM-sourcetype.tif/jpg
+                if regex_format_1.match(file):
+                    # Split the filename by '-' and '.'
+                    parts = file.split('-')
+                    if len(parts) != 3:
+                        continue  # Skip filenames that don't match the expected format
+                    
+                    index, date_part, rest = parts
+                    year, month = date_part.split('-')
+                    yyyymm = f"{year}{month}"  # Create the YYYYMM key
+
+                # Check if the file matches the second format: index-YYYYMM-sourcetype.tif/jpg
+                elif regex_format_2.match(file):
+                    parts = file.split('-')
+                    if len(parts) != 2:
+                        continue  # Skip filenames that don't match the expected format
+
+                    index, rest = parts
+                    date_part = index[-6:]  # Extract the YYYYMM from the last 6 digits
+                    yyyymm = date_part  # Use YYYYMM directly
+
+                else:
+                    continue  # Skip files that don't match either format
+
+                # Increment the count for the folder (source) and YYYYMM
+                result[yyyymm][folder] += 1
+
+            except Exception as e:
+                print(f"Error processing file {file}: {e}")
+    
+    # Get all folder names (source types, now columns)
+    folders = sorted(all_files_dict.keys())
+
+    # Write to CSV
+    with open(output_csv, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        
+        # Write the header (folder names as columns)
+        writer.writerow(['YYYYMM'] + folders)
+        
+        # Write the rows (YYYYMM and counts for each folder)
+        for yyyymm, counts in sorted(result.items()):
+            row = [yyyymm] + [counts.get(folder, 0) for folder in folders]
+            writer.writerow(row)
+    
 
 
 def test_credentials():

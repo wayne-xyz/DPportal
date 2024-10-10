@@ -171,6 +171,20 @@ def test_ee_connection():
 
 
 
+
+# save the static file to the static folder from the google drive
+def save_static_file():
+    # save the static file to the static folder
+    #  path for csv file
+    static_csv_file_path='static/data/static_data.csv'
+
+    # perform the static file by check the google drive folder 
+
+
+    pass
+
+
+
 def main():
     print("Starting the task")
     initialize_ee()
