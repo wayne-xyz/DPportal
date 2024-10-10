@@ -204,6 +204,7 @@ def get_all_files_names(folder_names):
     return all_files
 
 
+# save the static data to the csv file
 def perform_saving_static_data():
     # save the all_files to the csv file
     all_files_dict = get_all_files_names(static_folder_name)

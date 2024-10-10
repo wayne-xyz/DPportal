@@ -3,6 +3,7 @@ import os
 from drive_utils import search_in_target_folders
 from update_task import download_tif_file
 from drive_utils import rewrite_update_log
+from drive_utils import perform_saving_static_data
 
 
 app = Flask(__name__, static_folder='static')
@@ -19,7 +20,10 @@ def get_csv():
 
 @app.route('/data_statics')
 def data_statics():
+    perform_saving_static_data()
     return render_template('data_statics.html')
+
+
 
 
 
