@@ -12,9 +12,6 @@
     <script src="https://js.arcgis.com/4.30/"></script>
 
     <style>
-        body {
-            margin-bottom: 60px; /* Adjust this value based on your footer height */
-        }
         footer {
             position: fixed;
             left: 0;
@@ -26,13 +23,11 @@
             z-index: 1000;
         }
         #map {
-            height: 400px; /* Adjust the height as needed */
+            height: 800px; /* Adjust the height as needed */
             width: 100%;
             margin-top: 20px;
         }
-        .hidden-map {
-            display: none;
-        }
+
 
     </style>
 </head>
@@ -40,15 +35,16 @@
 
     <div class="main-container">
         <div class="search-container">
-            <h1>Búsqueda de Imágenes Satelitales de Áreas Degradadas en Perú</h1>
+            <h1 class="main-title">Búsqueda de Imágenes Satelitales de Áreas Degradadas en Perú</h1>
             <input type="text" id="searchInput" placeholder="Tipee el código de su botadero/área degradada" class="search-bar" required>
             <button onclick="performSearch()" class="search-button">Buscar</button>
         </div>
         <div class="map-results-container">
-            <div id="map" class="hidden-map" ></div>
+
             <div id="results" class="results" style="max-height: 600px; overflow-y: auto; margin-top: 20px;">
                 <!-- Search results will be updated here -->
             </div>
+            <div id="map" class="hidden-map" ></div>
         </div>
     </div>
     <footer>

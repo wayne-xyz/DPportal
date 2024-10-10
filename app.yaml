@@ -4,7 +4,6 @@ runtime: python311
 env_variables:
   GOOGLE_APPLICATION_CREDENTIALS: "google_drive_credentials.json"
 
-
 handlers:
   # This configures Google App Engine to serve the files in the app's static
   # directory.

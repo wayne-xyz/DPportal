@@ -2,3 +2,5 @@ google_drive_credentials.json
 token.pickle    
 data_pre/
 stone-armor-430205-e2-2cd696d4afcd.json
+# ... other entries ...
+esri_api_key.json

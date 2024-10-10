@@ -1,0 +1,8 @@
+{
+    "EsriWorldImagery_jpg": "Esri World Imagery",
+    "nicfi_jpg": "NICFI Satellite Data",
+    "sentinel_jpg": "Sentinel-2 Satellite Data",
+    "EsriWorldImagery_jpg description": "Esri World Imagery is a global basemap provided by Esri, offering high-resolution satellite and aerial imagery for use in mapping and geographic information systems (GIS). <a href='https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9' style='color: #8080FF;'>Learn more</a>",
+    "nicfi_jpg description": "Norwegian International Climate and Forest Initiative (NICFI), in collaboration with satellite imagery provider Planet, offers free, high-resolution satellite data of the world's tropical forests to support efforts to reduce deforestation and monitor environmental changes. <a href='https://www.planet.com/nicfi/' style='color: #8080FF;'>Learn more</a>",
+    "sentinel_jpg description": "Sentinel-2 is a joint European Union (EU) and European Space Agency (ESA) Earth observation programme that provides free, global access to high-resolution satellite imagery of the Earth's land surface. It is designed to monitor land cover, land use, and environmental changes, including vegetation health, water resources, and urban areas. <a href='https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED' style='color: #8080FF;'>Learn more</a>"
+}

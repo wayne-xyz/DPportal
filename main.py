@@ -4,6 +4,8 @@ from drive_utils import search_in_target_folders
 from update_task import download_tif_file
 from drive_utils import rewrite_update_log
 from drive_utils import perform_saving_static_data
+import json
+
 
 
 app = Flask(__name__, static_folder='static')
@@ -59,6 +61,13 @@ def update_task():
 def update_log():
     rewrite_update_log()
     return jsonify({'status': 'success'})
+
+# TODO: fix the limit only for the javascript fetch request and from the same origin
+@app.route('/get_esri_api_key')
+def get_esri_api_key():
+    api_key = json.load(open('esri_api_key.json'))['ESRI_API_KEY']
+    return jsonify({'api_key': api_key})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
