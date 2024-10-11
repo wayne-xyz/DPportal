@@ -54,14 +54,15 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 2. Enable the App Engine API for the project
 3. Google Drive API setup 
 4. Enable the Google Drive API for the project
-5. Create a new OAuth 2.0 client ID and download the JSON key file
-6. Set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to the path of the JSON key file
-7. Hide the JSON key file by adding it to .gitignore (google_drive_credentials.json)
-8. Enable the Cloud Scheduler API for the projects, seeting in the Cloud Scheduler UI
-9. Non-commericial use of the Earth Engine is free, [earth engine](https://earthengine.google.com/noncommercial/)
-10. Register a New Earth Engine project, and add it to current app engine project [add EE project](https://code.earthengine.google.com/register)
-11. Access the nicfi data on EE, [nicfi](https://developers.planet.com/docs/integrations/gee/nicfi/)
-12. Cloud console IAM & Admin, add the Earth Engine Resource Admin role to the service account.
+5. Create a service account, and download the JSON key file
+6. Seeting the Permissions for the service account to access the Google Drive and Google Earth Engine.      
+7. Set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to the path of the JSON key file
+8. Hide the JSON key file by adding it to .gitignore (google_drive_credentials.json)
+9. Enable the Cloud Scheduler API for the projects, seeting in the Cloud Scheduler UI
+10. Non-commericial use of the Earth Engine is free, [earth engine](https://earthengine.google.com/noncommercial/)
+11. Register a New Earth Engine project, and add it to current app engine project [add EE project](https://code.earthengine.google.com/register)
+12. Access the nicfi data on EE, [nicfi](https://developers.planet.com/docs/integrations/gee/nicfi/)
+13. Cloud console IAM & Admin, add the Earth Engine Resource Admin role to the service account.
 
 
 ### Deployment

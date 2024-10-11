@@ -16,8 +16,12 @@ import time
 
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
-# service account key file
+# service account key file: two keys are provided, one for dev1, one for dev2
 DRIVE_GEE_KEY_FILE = 'stone-armor-430205-e2-2cd696d4afcd.json'
+
+if DRIVE_GEE_KEY_FILE not in os.listdir():
+    DRIVE_GEE_KEY_FILE = 'stone-armor-430205-e2-9913c17acb94.json'
+
 
 # folder names
 esri_world_imagery_folder_name="EsriWorldImagery_jpg"
