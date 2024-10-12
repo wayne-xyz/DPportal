@@ -147,6 +147,8 @@ def search_in_folder(folder_id, query_string):
 
 # search in all target folders and add a target folder name to the result
 def search_in_target_folders(query_string):
+    if not is_production():
+        print(f"Searching for '{query_string}' in target folders")
     start_time = time.time()
     results = []
     for folder_name in target_folders:
@@ -207,9 +209,10 @@ def count_files_in_date_folder(folder_name, current_date):
     folder_id = get_folder_id(folder_name)
     
     # Query for image files (jpg, jpeg, tif, tiff) containing the current date
-    query = f"'{folder_id}' in parents and name contains '{current_date}' and trashed=false"
-    # query += "mimeType='image/jpeg' or mimeType='image/tiff' or "
-    # query += "fileExtension='jpg' or fileExtension='jpeg' or fileExtension='tif' or fileExtension='tiff')"
+    
+    query = f"'{folder_id}' in parents and name contains '{current_date}' and trashed=false and ("
+    query += "mimeType='image/jpeg' or mimeType='image/tiff' or "
+    query += "fileExtension='jpg' or fileExtension='jpeg' or fileExtension='tif' or fileExtension='tiff')"
     
 
     page_token = None
@@ -217,9 +220,9 @@ def count_files_in_date_folder(folder_name, current_date):
         results = service.files().list(
             q=query,
             spaces='drive',
-            fields='nextPageToken, files(id, name)',
+            fields='nextPageToken, files(id, name, mimeType)',
             pageToken=page_token,
-            pageSize=100  # Increase page size for efficiency
+            pageSize=1000  # Increase page size for efficiency
         ).execute()
         
         files = results.get('files', [])
@@ -253,7 +256,11 @@ def perform_static_data_saving_csv():
 
         # Process the current date here
         for folder_name in static_folder_name:
-            count = count_files_in_date_folder(folder_name, current_date)
+            if folder_name == "nicfi_tif_2024":
+                #  change the current_date format to YYYY-MM    
+                count = count_files_in_date_folder(folder_name, f"{current_date[:4]}-{current_date[4:]}")
+            else:
+                count = count_files_in_date_folder(folder_name, current_date)
             
         year = current_date[:4]
         month = current_date[4:6]
