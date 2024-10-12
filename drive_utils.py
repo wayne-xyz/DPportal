@@ -208,9 +208,12 @@ def count_files_in_date_folder(folder_name, current_date):
     service = build('drive', 'v3', credentials=creds)
     folder_id = get_folder_id(folder_name)
     
-    # Query for image files (jpg, jpeg, tif, tiff) containing the current date
-    
-    query = f"'{folder_id}' in parents and name contains '{current_date}' and trashed=false and ("
+    if folder_name == "nicfi_tif_2024":
+        query = f"'{folder_id}' in parents and name contains '{current_date}' and trashed=false and ("
+    else:
+        name_str=f"(name contains '{current_date}01' or name contains '{current_date}10' or name contains '{current_date}20')"
+        query = f"'{folder_id}' in parents and {name_str} and trashed=false and ("
+
     query += "mimeType='image/jpeg' or mimeType='image/tiff' or "
     query += "fileExtension='jpg' or fileExtension='jpeg' or fileExtension='tif' or fileExtension='tiff')"
     

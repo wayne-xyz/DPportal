@@ -1,5 +1,5 @@
 from drive_utils import perform_static_data_saving_csv, get_folder_id, search_in_folder, count_files_in_date_folder
-
+import time
 
 # how to run the test
 # python3 test.py
@@ -16,10 +16,13 @@ def test_search_in_folder():
     print(search_in_folder(folder_id, '1822'))
 
 def test_count_files_in_date_folder():
-
-    print(count_files_in_date_folder("sentinel_tif_2024", '202401'))
+    #  get the function running time
+    start_time = time.time()
+    print(count_files_in_date_folder("sentinel_tif_2024", "202401"))
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")
 
 
 if __name__ == "__main__":
-    test_count_files_in_date_folder()
+    test_perform_static_data_saving_csv()
 
