@@ -19,7 +19,7 @@ def get_csv():
     csv_path = os.path.join(app.static_folder, 'data', 'Shapefile_data_20240819.csv')
     return send_from_directory(os.path.dirname(csv_path), os.path.basename(csv_path))
 
-
+# save the static data to the csv file
 @app.route('/data_statics')
 def data_statics():
     perform_saving_static_data()

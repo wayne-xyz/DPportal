@@ -12,6 +12,10 @@ import os
 import time
 
 
+# For save the static data to the csv file 
+STATIC_DATE_START= "202301"
+STATIC_DATE_END= "202407"
+
 
 
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -194,86 +198,78 @@ def rewrite_update_log():
         log_file.write(f"Date range of {nicfi_jpg_folder_name}: {nicfi_range}\n")
 
 
-# get all the files names by folder name or list of folder names from Google Drive
-def get_all_files_names(folder_names):
-    all_files = {}
-    if isinstance(folder_names, str):
-        folder_names = [folder_names]
+
+# process the current date in the folder_name and return the count of the files
+def count_files_in_date_folder(folder_name, current_date):
+    count = 0
+    creds = get_credentials()
+    service = build('drive', 'v3', credentials=creds)
+    folder_id = get_folder_id(folder_name)
     
-    for folder_name in folder_names:
-        folder_id = get_folder_id(folder_name)
-        files = search_in_folder(folder_id, '')
-        all_files[folder_name] = [file['name'] for file in files]
+    # Query for image files (jpg, jpeg, tif, tiff) containing the current date
+    query = f"'{folder_id}' in parents and name contains '{current_date}' and trashed=false"
+    # query += "mimeType='image/jpeg' or mimeType='image/tiff' or "
+    # query += "fileExtension='jpg' or fileExtension='jpeg' or fileExtension='tif' or fileExtension='tiff')"
     
-    return all_files
 
-
-# save the static data to the csv file
-def perform_saving_static_data():
-    # save the all_files to the csv file
-    all_files_dict = get_all_files_names(static_folder_name)
-
-    if is_production()==False:
-        print(all_files_dict)
-
-
-    # Define the CSV file path
-    output_csv = 'static/data/static_data.csv'
-        # Dictionary to store the aggregated data
-    result = defaultdict(lambda: defaultdict(int))
-
-   # Regular expressions for matching the two formats
-    regex_format_1 = re.compile(r'\d{3,6}-\d{4}-\d{2}-.*\.(tif|jpg)')
-    regex_format_2 = re.compile(r'\d{3,6}-\d{6}-.*\.(tif|jpg)')
-
-    # Process each folder and its files
-    for folder, files in all_files_dict.items():
-        for file in files:
-            try:
-                # Check if the file matches the first format: index-YYYY-MM-sourcetype.tif/jpg
-                if regex_format_1.match(file):
-                    # Split the filename by '-' and '.'
-                    parts = file.split('-')
-                    if len(parts) != 3:
-                        continue  # Skip filenames that don't match the expected format
-                    
-                    index, date_part, rest = parts
-                    year, month = date_part.split('-')
-                    yyyymm = f"{year}{month}"  # Create the YYYYMM key
-
-                # Check if the file matches the second format: index-YYYYMM-sourcetype.tif/jpg
-                elif regex_format_2.match(file):
-                    parts = file.split('-')
-                    if len(parts) != 2:
-                        continue  # Skip filenames that don't match the expected format
-
-                    index, rest = parts
-                    date_part = index[-6:]  # Extract the YYYYMM from the last 6 digits
-                    yyyymm = date_part  # Use YYYYMM directly
-
-                else:
-                    continue  # Skip files that don't match either format
-
-                # Increment the count for the folder (source) and YYYYMM
-                result[yyyymm][folder] += 1
-
-            except Exception as e:
-                print(f"Error processing file {file}: {e}")
-    
-    # Get all folder names (source types, now columns)
-    folders = sorted(all_files_dict.keys())
-
-    # Write to CSV
-    with open(output_csv, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
+    page_token = None
+    while True:
+        results = service.files().list(
+            q=query,
+            spaces='drive',
+            fields='nextPageToken, files(id, name)',
+            pageToken=page_token,
+            pageSize=100  # Increase page size for efficiency
+        ).execute()
         
-        # Write the header (folder names as columns)
-        writer.writerow(['YYYYMM'] + folders)
+        files = results.get('files', [])
+
+        count += len(files)
         
-        # Write the rows (YYYYMM and counts for each folder)
-        for yyyymm, counts in sorted(result.items()):
-            row = [yyyymm] + [counts.get(folder, 0) for folder in folders]
-            writer.writerow(row)
+        page_token = results.get('nextPageToken')
+        if not page_token:
+            break
+    if not is_production():
+        print(f"Folder {folder_name} has {count} files for date {current_date}")
+
+    return count
+
+
+
+#  iterate over the static date range and interate the files_list and save the static data to the csv file
+def perform_static_data_saving_csv():
+    # get the static date start and end from the environment variables
+    static_date_start = STATIC_DATE_START   
+    static_date_end = STATIC_DATE_END
+
+    if not is_production():
+        print(f"Static date start: {static_date_start}, static date end: {static_date_end}")
+
+    # iterate over the static date range and print the date the format is YYYYMM
+    current_date = static_date_end
+    while current_date >= static_date_start:
+        if not is_production():
+            print(f"Processing date: {current_date}")
+
+        # Process the current date here
+        for folder_name in static_folder_name:
+            count = count_files_in_date_folder(folder_name, current_date)
+            
+        year = current_date[:4]
+        month = current_date[4:6]
+        
+        # Decrement the date
+        month = int(month) - 1
+        if month < 1:
+            month = 12
+            year = str(int(year) - 1)
+        
+        current_date = f"{year}{month:02d}"
+
+    # ... rest of the function ...
+    pass 
+
+
     
 
 
