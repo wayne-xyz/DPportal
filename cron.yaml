@@ -3,3 +3,8 @@ cron:
   url: /update_task
   schedule: "1 of month 00:00"
   timezone: "UTC"
+
+- description: "48 hours task to save the static data"
+  url: /daily_task
+  schedule: "every 48 hours"
+  timezone: "UTC"

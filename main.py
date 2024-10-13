@@ -3,7 +3,7 @@ import os
 from drive_utils import search_in_target_folders
 from update_task import download_tif_file
 from drive_utils import rewrite_update_log
-
+from daily_task import perform_static_data_saving_csv
 import json
 
 
@@ -26,6 +26,10 @@ def data_statics():
     return render_template('data_statics.html')
 
 
+@app.route('/daily_task')
+def daily_task():
+    perform_static_data_saving_csv()
+    return jsonify({'status': 'success'})
 
 
 

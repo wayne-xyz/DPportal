@@ -15,6 +15,7 @@ import time
 # For save the static data to the csv file 
 STATIC_DATE_START= "202301"
 STATIC_DATE_END= "202407"
+STATIC_CSV_FILE_PATH='static/data/static_data.csv'
 
 
 
@@ -248,6 +249,12 @@ def perform_static_data_saving_csv():
     static_date_start = STATIC_DATE_START   
     static_date_end = STATIC_DATE_END
 
+    # clear the csv file content if it exists
+    if os.path.exists(STATIC_CSV_FILE_PATH):
+        with open(STATIC_CSV_FILE_PATH, 'w') as file:
+            pass
+
+
     if not is_production():
         print(f"Static date start: {static_date_start}, static date end: {static_date_end}")
 
@@ -258,13 +265,24 @@ def perform_static_data_saving_csv():
             print(f"Processing date: {current_date}")
 
         # Process the current date here
+        counts = []
         for folder_name in static_folder_name:
             if folder_name == "nicfi_tif_2024":
                 #  change the current_date format to YYYY-MM    
                 count = count_files_in_date_folder(folder_name, f"{current_date[:4]}-{current_date[4:]}")
             else:
                 count = count_files_in_date_folder(folder_name, current_date)
-            
+            counts.append(count)
+
+        # write one line to the csv file
+        # save all the count of the folders to the csv file with the title: date,folder_name1, folder_name2, ...
+        # value are the counts of the files in the folders
+        with open(STATIC_CSV_FILE_PATH, 'a') as file:
+            if file.tell() == 0:
+                file.write("date," + ",".join(static_folder_name) + "\n")
+            file.write(f"{current_date},{','.join(map(str, counts))}\n")
+
+
         year = current_date[:4]
         month = current_date[4:6]
         
