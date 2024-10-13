@@ -58,12 +58,12 @@ def search():
 # using the cron.yaml to run the update_task function
 @app.route('/update_task')
 def update_task():
-    download_tif_file()
+
     return jsonify({'status': 'success'})
 
 @app.route('/update_log')
 def update_log():
-    rewrite_update_log()
+
     return jsonify({'status': 'success'})
 
 # TODO: fix the limit only for the javascript fetch request and from the same origin

@@ -153,6 +153,7 @@ def download_tif_file():
 # function to test the earth engine connection
 def test_ee_connection():
     #Start time
+    initialize_ee()
     start_time = datetime.datetime.now()
     # test the earth engine connection
 
@@ -192,11 +193,7 @@ def save_static_file():
 
 
 def main():
-    print("Starting the task")
-    initialize_ee()
-    test_ee_connection()
-    test_export_tif_image_dynamic_size()
-
+    pass
 
 
 if __name__ == "__main__":

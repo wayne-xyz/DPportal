@@ -1,6 +1,8 @@
 from drive_utils import perform_static_data_saving_csv, get_folder_id, search_in_folder, count_files_in_date_folder
 import time
 
+from update_task import test_ee_connection
+
 # how to run the test
 # python3 test.py
 
@@ -22,7 +24,10 @@ def test_count_files_in_date_folder():
     end_time = time.time()
     print(f"Time taken: {end_time - start_time} seconds")
 
+def test_ee():
+    test_ee_connection()
+
 
 if __name__ == "__main__":
-    test_perform_static_data_saving_csv()
 
+    test_ee()
