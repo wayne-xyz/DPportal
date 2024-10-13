@@ -1,4 +1,5 @@
 import datetime
+import os
 from google.oauth2 import service_account
 import ee
 import pandas as pd
@@ -12,6 +13,11 @@ SHAPE_FILE_SIZE_THRESHOLD=0.1 # in hectares
 FILTER_FIELD_NAME="AREA_HA"
 NICFI_IMAGE_PROJECT='projects/planet-nicfi/assets/basemaps/americas'
 SENTINEL_IMAGE_PROJECT='COPERNICUS/S2_SR_HARMONIZED'
+DEV_TEST_FOLDER_PREFIX="dev_test"
+
+def is_production():
+    # Google App Engine sets this environment variable in the production environment
+    return os.getenv('GAE_ENV', '').startswith('standard')
 
 
 # function to update the log file in the static folder, with the current date and time, add the message to the log file
