@@ -1,5 +1,6 @@
 import datetime
 import os
+import yaml
 from google.oauth2 import service_account
 import ee
 import pandas as pd
@@ -15,6 +16,29 @@ FILTER_FIELD_NAME="AREA_HA"
 NICFI_IMAGE_PROJECT='projects/planet-nicfi/assets/basemaps/americas'
 SENTINEL_IMAGE_PROJECT='COPERNICUS/S2_SR_HARMONIZED'
 DEV_TEST_FOLDER_PREFIX="dev_test"
+ 
+# path for the task.yaml file and parameters
+TASK_YAML_FILE_PATH='update_task.yaml'
+DEV_TEST_FOLDER_NAME="dev_test"
+NICFI_FOLDER_NAME="nicfi_tif"
+SENTINEL_FOLDER_NAME="sentinel_tif"
+
+
+
+def read_task_yaml():
+    # read the task.yaml file
+    with open(TASK_YAML_FILE_PATH, 'r') as task_file:
+        task_data = yaml.safe_load(task_file)
+    # get the dev_test_folder_name, nicfi_folder_name, sentinel_folder_name from the task_data
+    global DEV_TEST_FOLDER_NAME, NICFI_FOLDER_NAME, SENTINEL_FOLDER_NAME
+    DEV_TEST_FOLDER_NAME = task_data['dev_test_folder_name']
+    NICFI_FOLDER_NAME = task_data['nicfi_folder_name']
+    SENTINEL_FOLDER_NAME = task_data['sentinel_folder_name']
+
+    return task_data
+
+# read the task.yaml file
+read_task_yaml()
 
 
 
