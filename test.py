@@ -1,7 +1,8 @@
 from drive_utils import perform_static_data_saving_csv, get_folder_id, search_in_folder, count_files_in_date_folder
 import time
 
-from update_task import test_ee_connection
+from update_task import test_ee_connection,test_export_tif_image_dynamic_size
+
 
 # how to run the test
 # python3 test.py
@@ -27,7 +28,11 @@ def test_count_files_in_date_folder():
 def test_ee():
     test_ee_connection()
 
+def test_export():
+    test_export_tif_image_dynamic_size()
+
 
 if __name__ == "__main__":
 
     test_ee()
+    test_export()

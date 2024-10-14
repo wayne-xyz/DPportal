@@ -3,6 +3,7 @@ import os
 from google.oauth2 import service_account
 import ee
 import pandas as pd
+from ee.ee_exception import EEException
 
 
 
@@ -14,6 +15,8 @@ FILTER_FIELD_NAME="AREA_HA"
 NICFI_IMAGE_PROJECT='projects/planet-nicfi/assets/basemaps/americas'
 SENTINEL_IMAGE_PROJECT='COPERNICUS/S2_SR_HARMONIZED'
 DEV_TEST_FOLDER_PREFIX="dev_test"
+
+
 
 def is_production():
     # Google App Engine sets this environment variable in the production environment
@@ -100,9 +103,16 @@ def check_ee_task_list():
     tasks = ee.batch.Task.list()
     print(tasks)
 
+
+#  function to test the export_tif_image_dynamic_size function
 def test_export_tif_image_dynamic_size():
     # test the export_tif_image_dynamic_size function
-    start_time = datetime.datetime.now() 
+    start_time = datetime.datetime.now()
+    initialize_ee()
+    
+    # check the current ee's project information
+
+
 
     test_filter_field_name="Index"
     index_value=1815
@@ -124,19 +134,33 @@ def test_export_tif_image_dynamic_size():
     # Define a simple query to test access to the NICFI collection
     try:
         nicfi = ee.ImageCollection(NICFI_IMAGE_PROJECT)
-        # Use the most recent complete quarter
+        
+        # First, let's check if we can access the collection at all
+        # collection_info = ee.data.getInfo(NICFI_IMAGE_PROJECT)
+        # if collection_info:
+        #     print("Successfully accessed NICFI collection metadata.")
+        # else:
+        #     print("Error: Failed to access NICFI collection metadata.", collection_info)
+        
+        # Now let's try to get an image
         nicfi_image = nicfi.filterDate("2024-06-01T00:00:00", "2024-07-01T00:00:00").sort('system:time_start', False).first()
-
-        print(ee.Date( nicfi_image.date()).format().getInfo())
 
         if nicfi_image:
             print("NICFI image retrieved successfully")
-            export_tif_image_dynamic_size(index_value, test_feature, nicfi_image, date_str='YYYYMM', source_name="nicfi", folder_name="test_file", shape_size=size_value_ha)
+            print(ee.Date(nicfi_image.date()).format().getInfo())
+            export_tif_image_dynamic_size(index_value, test_feature, nicfi_image, date_str='YYYYMM', source_name="nicfi", folder_name=DEV_TEST_FOLDER_PREFIX, shape_size=size_value_ha)
         else:
-            print("No NICFI image found for the given date range")
+            print("No NICFI image found for the given date range. This could be due to no images in the specified timeframe.")
 
+    except EEException as ee_error:
+        if "not found" in str(ee_error):
+            print(f"Error: You do not have access to the NICFI collection. {ee_error}")
+            print("Please ensure you have requested and been granted access to NICFI data.")
+            print("Visit https://developers.planet.com/nicfi/ to request access if needed.")
+        else:
+            print(f"Earth Engine error: {ee_error}")
     except Exception as e:
-        print(f"Error accessing NICFI collection: {e}")
+        print(f"Unexpected error accessing NICFI collection: {e}")
 
     #end time
     end_time = datetime.datetime.now()
