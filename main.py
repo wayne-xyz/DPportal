@@ -1,12 +1,10 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 from drive_utils import search_in_target_folders
-from update_task import download_tif_file
-from drive_utils import rewrite_update_log
 from daily_task import perform_static_data_saving_csv
 import json
-
-
+from datetime import datetime
+import csv
 
 app = Flask(__name__, static_folder='static')
 
@@ -19,17 +17,32 @@ def get_csv():
     csv_path = os.path.join(app.static_folder, 'data', 'Shapefile_data_20240819.csv')
     return send_from_directory(os.path.dirname(csv_path), os.path.basename(csv_path))
 
+
+def parse_date(date_str):
+    return datetime.strptime(date_str, '%Y%m').strftime('%b %Y')
+
 # save the static data to the csv file
 @app.route('/data_statics')
 def data_statics():
-
-    return render_template('data_statics.html')
-
+    data = []
+    with open('static/data/static_data.csv', 'r') as csvfile:
+        csvreader = csv.DictReader(csvfile)
+        for row in csvreader:
+            row['date'] = parse_date(row['date'])
+            data.append(row)
+    
+    # Sort the data by date in descending order
+    data.sort(key=lambda x: datetime.strptime(x['date'], '%b %Y'), reverse=True)
+    
+    return render_template('data_statics.html', data=data)
 
 @app.route('/daily_task')
 def daily_task():
     perform_static_data_saving_csv()
     return jsonify({'status': 'success'})
+
+
+
 
 
 
@@ -61,10 +74,6 @@ def update_task():
 
     return jsonify({'status': 'success'})
 
-@app.route('/update_log')
-def update_log():
-
-    return jsonify({'status': 'success'})
 
 # TODO: fix the limit only for the javascript fetch request and from the same origin
 @app.route('/get_esri_api_key')
