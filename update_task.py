@@ -219,6 +219,48 @@ def test_ee_connection():
     print(f"Time taken: {end_time - start_time}")
 
 
+def monthly_task():
+    # perform the monthly task
+    print("Monthly task start: ", datetime.datetime.now())
+
+    # get the current month
+    initialize_ee()
+    current_month = datetime.datetime.now().strftime("%Y-%m")
+    print("Current month: ", current_month)
+    
+    # check the nicfi image collection newest image month
+    nicfi = ee.ImageCollection(NICFI_IMAGE_PROJECT)
+    
+    # Calculate date 5 months ago
+    five_months_ago = datetime.datetime.now() - datetime.timedelta(days=5*30)  # Approximation
+    five_months_ago_str = five_months_ago.strftime("%Y-%m")
+
+    newest_nicfi_image = nicfi.filter(ee.Filter.date(five_months_ago_str, current_month)).sort('system:time_start', False).first()
+    #  check the newest nicfi image month is last month or not
+    # Calculate last month's date
+    last_month = (datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)).strftime("%Y-%m")
+    
+    # Get the newest NICFI image date
+    newest_nicfi_date = ee.Date(newest_nicfi_image.date()).format('YYYY-MM').getInfo()
+    print("Newest NICFI image month: ", newest_nicfi_date)
+    
+    if newest_nicfi_date == last_month:
+        #  perform the download tif file task
+        
+
+
+
+        print("The newest NICFI image is from last month")
+    else:
+        print(f"The newest NICFI image is not from last month. It's from: {newest_nicfi_date}")
+
+
+    # get the shapefile table
+
+
+    pass
+
+
 
 
 # save the static file to the static folder from the google drive

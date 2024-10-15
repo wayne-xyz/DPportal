@@ -1,7 +1,7 @@
 from drive_utils import perform_static_data_saving_csv, get_folder_id, search_in_folder, count_files_in_date_folder
 import time
 
-from update_task import test_ee_connection,test_export_tif_image_dynamic_size
+from update_task import test_ee_connection,test_export_tif_image_dynamic_size,monthly_task
 
 
 # how to run the test
@@ -34,5 +34,5 @@ def test_export():
 
 if __name__ == "__main__":
 
-    test_ee()
-    test_export()
+    
+    monthly_task()
