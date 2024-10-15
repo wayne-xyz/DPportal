@@ -23,6 +23,9 @@ DEV_TEST_FOLDER_NAME="dev_test"
 NICFI_FOLDER_NAME="nicfi_tif"
 SENTINEL_FOLDER_NAME="sentinel_tif"
 
+# the number of the image to download in one task
+DOWNLOAD_IMAGE_POOL_SIZE=1000
+
 
 
 def read_task_yaml():
@@ -128,6 +131,9 @@ def check_ee_task_list():
     print(tasks)
 
 
+
+
+
 #  function to test the export_tif_image_dynamic_size function
 def test_export_tif_image_dynamic_size():
     # test the export_tif_image_dynamic_size function
@@ -135,9 +141,6 @@ def test_export_tif_image_dynamic_size():
     initialize_ee()
     
     # check the current ee's project information
-
-
-
     test_filter_field_name="Index"
     index_value=1815
     test_selecter=ee.Filter.eq(test_filter_field_name, index_value)
@@ -158,15 +161,6 @@ def test_export_tif_image_dynamic_size():
     # Define a simple query to test access to the NICFI collection
     try:
         nicfi = ee.ImageCollection(NICFI_IMAGE_PROJECT)
-        
-        # First, let's check if we can access the collection at all
-        # collection_info = ee.data.getInfo(NICFI_IMAGE_PROJECT)
-        # if collection_info:
-        #     print("Successfully accessed NICFI collection metadata.")
-        # else:
-        #     print("Error: Failed to access NICFI collection metadata.", collection_info)
-        
-        # Now let's try to get an image
         nicfi_image = nicfi.filterDate("2024-06-01T00:00:00", "2024-07-01T00:00:00").sort('system:time_start', False).first()
 
         if nicfi_image:
