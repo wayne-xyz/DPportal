@@ -14,6 +14,10 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Update Log
+- 2024/10/14
+    - New page for the static data
+    - Daily update of the static data using the app engine cron job with google cloud scheduler
+
 - 2024/9/20
     - alpha branch released online versionID: [20240812t152105](https://20240812t152105-dot-stone-armor-430205-e2.uc.r.appspot.com/)
     - add new alpha branch for a new Dev status, for showing the ready Version 

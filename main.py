@@ -8,10 +8,12 @@ import csv
 
 app = Flask(__name__, static_folder='static')
 
+# show the main page
 @app.route('/')
 def hello():
     return render_template('index.html')
 
+# load the csv file to browser
 @app.route('/get_csv')
 def get_csv():
     csv_path = os.path.join(app.static_folder, 'data', 'Shapefile_data_20240819.csv')
@@ -21,7 +23,7 @@ def get_csv():
 def parse_date(date_str):
     return datetime.strptime(date_str, '%Y%m').strftime('%b %Y')
 
-# save the static data to the csv file
+# show the static data page
 @app.route('/data_statics')
 def data_statics():
     data = []
@@ -36,6 +38,8 @@ def data_statics():
     
     return render_template('data_statics.html', data=data)
 
+
+# daily task to update the static data
 @app.route('/daily_task')
 def daily_task():
     perform_static_data_saving_csv()
@@ -45,7 +49,7 @@ def daily_task():
 
 
 
-
+# search the files in the target folders
 @app.route('/search', methods=['GET'])
 def search():
     query = request.args.get('query', '')
