@@ -14,6 +14,10 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Update Log
+- 2024/10/15
+    - add new target index csv file( target rule: AREA_HA > 0.1 and 133 ), based on target index to perform the download task
+
+
 - 2024/10/14
     - New page for the static data
     - Daily update of the static data using the app engine cron job with google cloud scheduler

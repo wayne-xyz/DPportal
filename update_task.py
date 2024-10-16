@@ -8,6 +8,7 @@ from ee.ee_exception import EEException
 
 
 
+
 SERVICE_ACCOUNT_KEY_FILE = 'stone-armor-430205-e2-2cd696d4afcd.json'
 EE_PROJECT_ID="stone-armor-430205-e2"
 SHARED_ASSETS_ID="projects/ee-qinheyi/assets/1823_ADRSM"
@@ -20,12 +21,23 @@ DEV_TEST_FOLDER_PREFIX="dev_test"
 # path for the task.yaml file and parameters
 TASK_YAML_FILE_PATH='update_task.yaml'
 DEV_TEST_FOLDER_NAME="dev_test"
-NICFI_FOLDER_NAME="nicfi_tif"
-SENTINEL_FOLDER_NAME="sentinel_tif"
+NICFI_FOLDER_NAME="nicfi_tif_2024"
+SENTINEL_FOLDER_NAME="sentinel_tif_2024"
 
 # the number of the image to download in one task
-DOWNLOAD_IMAGE_POOL_SIZE=1000
+DOWNLOAD_IMAGE_POOL_SIZE=2000
 
+EXPORT_TARGET_SHAPE_INDEX_FILE_PATH='static/data/Target_index.csv'
+TARGET_INDEX_LIST=[]
+
+#  PREPRARING =================================================
+# read the target index csv file and return the index list
+def read_target_index_csv():
+    # read the target index csv file
+    df = pd.read_csv(EXPORT_TARGET_SHAPE_INDEX_FILE_PATH)
+    return df['Index'].tolist()
+
+TARGET_INDEX_LIST=read_target_index_csv()
 
 
 def read_task_yaml():
@@ -43,18 +55,13 @@ def read_task_yaml():
 # read the task.yaml file
 read_task_yaml()
 
-
+#  PREPRARING =================================================
 
 def is_production():
     # Google App Engine sets this environment variable in the production environment
     return os.getenv('GAE_ENV', '').startswith('standard')
 
 
-# function to update the log file in the static folder, with the current date and time, add the message to the log file
-def update_log_file(message):
-    with open('static/log.txt', 'a') as log_file:
-        log_file.write(f"{datetime.datetime.now()}: {message}\n")
-        # example message: 2024-05-15 12:00:00: The task is starting
 
 # function to get the credentials from the service account key file, this scope could write to the drive
 def get_credentials():
@@ -69,7 +76,7 @@ def initialize_ee():
 
 
 # function to export the tif file image from GEE to Google Drive, based on the size of the shape 
-def export_tif_image_dynamic_size(ind, feature, image, date_str='YYYYMM', source_name="Source", folder_name="tif_file", shape_size=1):
+def export_tif_image_dynamic_size(ind, feature, image, date_str='YYYYMM', source_name="Source", folder_name=DEV_TEST_FOLDER_PREFIX, shape_size=1):
     """
     Export a TIF image from Google Earth Engine to Google Drive with dynamic sizing.
 
@@ -124,12 +131,269 @@ def export_tif_image_dynamic_size(ind, feature, image, date_str='YYYYMM', source
     print(f"Export task started for index {ind} with date {date_str}")
 
 
+#  check the ee task list is complete or not
+def is_ee_tasklist_complete():
+    tasks = ee.batch.Task.list()
+    for task in tasks:
+        if task.state == 'RUNNING' or task.state == 'READY':
+            return False
+    return True
+
+
+
 def check_ee_task_list():
     # get the task list from the earth engine
     # List all tasks
     tasks = ee.batch.Task.list()
     print(tasks)
 
+
+
+
+
+# monthly task to download the tif file from the gee and save them in drive
+def download_month_tif_file(nicfi_image, month_str):
+    #  month_str format: YYYY-MM
+    if nicfi_image is None:
+        if is_production():
+            print("No NICFI image found, try to get the image from the gee")
+        nicfi_image=nicfi_image_collection_by_month(month_str)
+    else:
+        if is_production():
+            print("NICFI image found")
+
+
+    # print the current date and time
+    print("Download last month tif file start: ", datetime.datetime.now())
+    task_submit_count=0
+    if is_production():
+        nicfi_drive_folder_name=NICFI_FOLDER_NAME
+    else:
+        nicfi_drive_folder_name=DEV_TEST_FOLDER_NAME
+
+    # for loop the shape file table and get the feature for each shape file
+    shapefile_table=ee.FeatureCollection(SHARED_ASSETS_ID)
+    # count of the shapefile table
+    shapefile_table_count=shapefile_table.size().getInfo()
+    print(f"The shapefile table has {shapefile_table_count} features")
+
+    # get the index list of the shapefile table
+    index_list=shapefile_table.aggregate_array('Index').getInfo()
+    print(f"The index list is {index_list}")
+
+    
+
+    # for loop the index list and get the feature for each index    
+    for index in index_list:
+        # get the feature for each index
+        feature=shapefile_table.filter(ee.Filter.eq('Index', index)).first()
+        # get the geometry of the feature and size of the geometry
+        geometry=feature.geometry()
+        size=geometry.area().getInfo()
+
+        # Import the DataFrame
+        df = pd.read_csv('static/data/Shapefile_data_20240819.csv')
+        area_value = df.loc[df['Index']==index, 'AREA_HA'].values[0]
+        print(f"The feature has size {size} square meters, and the area is {area_value} hectares")
+        if index in TARGET_INDEX_LIST:
+            # get the nicfi image collection from the nicfi_image_collection
+            # perfrom the exporting 
+            if is_production():
+                print("Index,", index, "Size,", size, "Area,", area_value, "is in the target index list")
+
+            # get the nicfi image collection from the nicfi_image_collection
+            pass
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    print(datetime.datetime.now())
+
+
+
+
+def manuly_download_tif_file(index, month_str):
+    # manuly download the tif file for the index
+    # 1. get the nicfi image from the gee
+    # 2. perform the export_tif_image_dynamic_size function
+    pass
+
+
+
+
+
+
+
+
+def get_nicfi_image_by_month(start_month_str, end_month_str):
+    #  paramter format: YYYY-MM
+    #  change to ee datas format
+    # check if ee is not initialized:
+
+    start_month_str = ee.Date(start_month_str).format('YYYY-MM').getInfo()
+    end_month_str = ee.Date(end_month_str).format('YYYY-MM').getInfo()
+    nicfi = ee.ImageCollection(NICFI_IMAGE_PROJECT)
+    image_collection = nicfi.filter(ee.Filter.date(start_month_str, end_month_str))
+    if not is_production():
+        # get the date of the image collection
+        image_count=image_collection.size().getInfo()
+        print(f"The image collection has {image_count} images")
+        image_collection_date = image_collection.first().date().format('YYYY-MM').getInfo()
+        print(f"The image collection date is {image_collection_date}")
+    return image_collection
+
+def get_feature_by_index(index):
+    # get the feature by the index
+    shapefile_table=ee.FeatureCollection(SHARED_ASSETS_ID)
+    feature=shapefile_table.filter(ee.Filter.eq('Index', index)).first()
+    if not is_production():
+        print(f"The feature has size {feature.geometry().area().getInfo()} square meters")
+    return feature
+
+
+
+
+#  function to get the nicfi image collection from the nicfi_image_collection. it will get the month_str and +1 month range to get the image collection
+def nicfi_image_collection_by_month(month_str):
+    #  paramter format: YYYY-MM
+
+
+    initialize_ee()
+    nicfi = ee.ImageCollection(NICFI_IMAGE_PROJECT)
+    
+    # Parse the input month
+    current_month = datetime.datetime.strptime(month_str, '%Y-%m')
+    
+    # Calculate the start of the next month
+    after_month = current_month.replace(day=1) + datetime.timedelta(days=32)
+    after_month = after_month.replace(day=1)
+    
+    # Format dates for Earth Engine
+    current_month_str = current_month.strftime('%Y-%m-%d')
+    after_month_str = after_month.strftime('%Y-%m-%d')
+    
+    print(f"Date range: {current_month_str} to {after_month_str}")
+    
+    # Filter the image collection
+    image_collection = nicfi.filter(ee.Filter.date(current_month_str, after_month_str))
+    
+    # Get the first image from the collection
+    first_image = image_collection.first()
+    
+    if first_image:
+        # Get the system:time_start property
+        image_time_start = first_image.get('system:time_start')
+        
+        # Convert the milliseconds since epoch to a datetime object
+        image_date = datetime.datetime.fromtimestamp(image_time_start.getInfo() / 1000)
+        
+        print(f"The image date is {image_date}")
+        
+        # You can add more processing here if needed
+        # For example, getting the image ID or other properties
+        image_id = first_image.get('system:index').getInfo()
+        print(f"Image ID: {image_id}")
+        
+    else:
+        print("No images found in the collection for the specified date range.")
+
+    # You can return the image or any other relevant information here if needed
+    return first_image
+
+
+
+
+
+#  function to perform the monthly task which is to download the tif file from the gee and save them in drive
+def monthly_task():
+    # perform the monthly task
+    print("Monthly task start: ", datetime.datetime.now())
+
+    # get the current month
+    initialize_ee()
+    current_month = datetime.datetime.now().strftime("%Y-%m")
+    print("Current month: ", current_month)
+    
+    # check the nicfi image collection newest image month
+    nicfi = ee.ImageCollection(NICFI_IMAGE_PROJECT)
+    
+    #  check the newest nicfi image month is last month or not
+    # Calculate last month's date
+    last_month = (datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)).strftime("%Y-%m")
+
+    newest_nicfi_image = get_nicfi_image_by_month(last_month, current_month)
+
+    
+    # Get the newest NICFI image date
+    newest_nicfi_date = ee.Date(newest_nicfi_image.date()).format('YYYY-MM').getInfo()
+    print("Newest NICFI image month: ", newest_nicfi_date)
+    
+    if newest_nicfi_date == last_month:
+        #  perform the download tif file task
+
+        print("The newest NICFI image is from last month")
+        if is_ee_tasklist_complete():
+            print("The ee task list is complete")
+            print("Start to download the tif file of the last month")
+            
+
+        else:
+            print("The ee task list is not complete")
+        
+
+
+
+    else:
+        print(f"The newest NICFI image is not from last month. It's from: {newest_nicfi_date}")
+
+
+    # get the shapefile table
+
+
+    pass
+
+
+
+
+
+# function to test the earth engine connection
+def test_ee_connection():
+    #Start time
+    initialize_ee()
+    start_time = datetime.datetime.now()
+    # test the earth engine connection
+
+    # Use ee.data.getAsset() instead of ee.Asset()
+    asset = ee.data.getAsset(SHARED_ASSETS_ID)
+
+    # get the count of the features 
+    shapefile_table=ee.FeatureCollection(SHARED_ASSETS_ID)
+    # print the count of the features and some description
+    print(f"The asset has {shapefile_table.size().getInfo()} features")
+    print(f"The asset type is: {asset['type']}")
+
+    # get the count of the features size greater than 0.1 AREA_HA
+    features_size_greater_than_0_1HA = shapefile_table.filter(ee.Filter.gte(FILTER_FIELD_NAME, SHAPE_FILE_SIZE_THRESHOLD))
+    print(f"The asset has {features_size_greater_than_0_1HA.size().getInfo()} features with size greater than {SHAPE_FILE_SIZE_THRESHOLD} hectares")
+
+    # End time
+    end_time = datetime.datetime.now()
+
+    print("Earth Engine connection successful")
+    print(f"Time taken: {end_time - start_time}")
 
 
 
@@ -185,101 +449,9 @@ def test_export_tif_image_dynamic_size():
     print(f"Time taken: {end_time - start_time}")
 
 
-# monthly task to download the tif file from the gee and save them in drive
-def download_tif_file():
-    # print the current date and time
-
-    print(datetime.datetime.now())
-
-
-# function to test the earth engine connection
-def test_ee_connection():
-    #Start time
-    initialize_ee()
-    start_time = datetime.datetime.now()
-    # test the earth engine connection
-
-    # Use ee.data.getAsset() instead of ee.Asset()
-    asset = ee.data.getAsset(SHARED_ASSETS_ID)
-
-    # get the count of the features 
-    shapefile_table=ee.FeatureCollection(SHARED_ASSETS_ID)
-    # print the count of the features and some description
-    print(f"The asset has {shapefile_table.size().getInfo()} features")
-    print(f"The asset type is: {asset['type']}")
-
-    # get the count of the features size greater than 0.1 AREA_HA
-    features_size_greater_than_0_1HA = shapefile_table.filter(ee.Filter.gte(FILTER_FIELD_NAME, SHAPE_FILE_SIZE_THRESHOLD))
-    print(f"The asset has {features_size_greater_than_0_1HA.size().getInfo()} features with size greater than {SHAPE_FILE_SIZE_THRESHOLD} hectares")
-
-    # End time
-    end_time = datetime.datetime.now()
-
-    print("Earth Engine connection successful")
-    print(f"Time taken: {end_time - start_time}")
-
-
-def monthly_task():
-    # perform the monthly task
-    print("Monthly task start: ", datetime.datetime.now())
-
-    # get the current month
-    initialize_ee()
-    current_month = datetime.datetime.now().strftime("%Y-%m")
-    print("Current month: ", current_month)
-    
-    # check the nicfi image collection newest image month
-    nicfi = ee.ImageCollection(NICFI_IMAGE_PROJECT)
-    
-    # Calculate date 5 months ago
-    five_months_ago = datetime.datetime.now() - datetime.timedelta(days=5*30)  # Approximation
-    five_months_ago_str = five_months_ago.strftime("%Y-%m")
-
-    newest_nicfi_image = nicfi.filter(ee.Filter.date(five_months_ago_str, current_month)).sort('system:time_start', False).first()
-    #  check the newest nicfi image month is last month or not
-    # Calculate last month's date
-    last_month = (datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)).strftime("%Y-%m")
-    
-    # Get the newest NICFI image date
-    newest_nicfi_date = ee.Date(newest_nicfi_image.date()).format('YYYY-MM').getInfo()
-    print("Newest NICFI image month: ", newest_nicfi_date)
-    
-    if newest_nicfi_date == last_month:
-        #  perform the download tif file task
-        
-
-
-
-        print("The newest NICFI image is from last month")
-    else:
-        print(f"The newest NICFI image is not from last month. It's from: {newest_nicfi_date}")
-
-
-    # get the shapefile table
-
-
-    pass
-
-
-
-
-# save the static file to the static folder from the google drive
-def save_static_file():
-    # save the static file to the static folder
-    #  path for csv file
-    static_csv_file_path='static/data/static_data.csv'
-
-    # perform the static file by check the google drive folder 
-
-
-    pass
-
-
-
 def main():
     pass
 
 
 if __name__ == "__main__":
-    download_tif_file()
     main()

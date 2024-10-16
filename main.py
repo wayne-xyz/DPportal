@@ -75,7 +75,7 @@ def search():
 # using the cron.yaml to run the update_task function
 @app.route('/update_task')
 def update_task():
-
+    print("update_task", datetime.now())
     return jsonify({'status': 'success'})
 
 
