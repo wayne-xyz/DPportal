@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 import csv
 from update_task import schedule_task_download_last_month
+import pandas as pd
 
 app = Flask(__name__, static_folder='static')
 
@@ -18,7 +19,8 @@ def hello():
 @app.route('/get_csv')
 def get_csv():
     csv_path = os.path.join(app.static_folder, 'data', 'Shapefile_data_20240819.csv')
-    return send_from_directory(os.path.dirname(csv_path), os.path.basename(csv_path))
+    df = pd.read_csv(csv_path)
+    return df.to_json(orient='records')
 
 
 def parse_date(date_str):
