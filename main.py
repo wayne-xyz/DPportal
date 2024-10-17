@@ -5,6 +5,7 @@ from daily_task import perform_static_data_saving_csv
 import json
 from datetime import datetime
 import csv
+from update_task import schedule_task_download_last_month
 
 app = Flask(__name__, static_folder='static')
 
@@ -76,6 +77,7 @@ def search():
 @app.route('/update_task')
 def update_task():
     print("update_task", datetime.now())
+    schedule_task_download_last_month()
     return jsonify({'status': 'success'})
 
 
