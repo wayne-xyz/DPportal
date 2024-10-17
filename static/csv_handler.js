@@ -57,7 +57,8 @@ function getAutocompleteSuggestions(input) {
             }
         })
         .map(item => ({Index: item.Index, DEN_BOT: item.DEN_BOT}))
-        .slice(0, 5); // Limit to 5 suggestions
+        .sort((a, b) => parseInt(a.Index) - parseInt(b.Index)) // Sort by Index
+        .slice(0, 10); // Limit to 10 suggestions
 }
 
 // Function to create and show autocomplete dropdown
