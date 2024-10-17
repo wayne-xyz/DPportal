@@ -98,6 +98,11 @@ gcloud app versions list
 gcloud app deploy --promote --version=YOUR_VERSION_ID
 ```
 
+5. Deploy the cron.yaml file
+```
+gcloud app deploy cron.yaml
+```
+
 Monitor the app's logs:
 ```
 gcloud app logs tail -s default
