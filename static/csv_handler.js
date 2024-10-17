@@ -1,44 +1,21 @@
 let csvData = [];
 
-// Function to load CSV file and store in local storage
-async function loadAndStoreCSV() {
-    const csvUrl = '/get_csv';  // Updated to match the Flask route
-    const storageKey = 'shapefileData';
-
-    // Check if data is already in local storage
-    if (!localStorage.getItem(storageKey)) {
-        try {
-            const response = await fetch(csvUrl);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const csvText = await response.text();
-            localStorage.setItem(storageKey, csvText);
-            console.log('CSV data loaded and stored in local storage');
-        } catch (error) {
-            console.error('Error loading CSV file:', error);
+// Function to load CSV file from the server
+async function loadCSV() {
+    const dataUrl = '/get_csv';
+    try {
+        const response = await fetch(dataUrl);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-    } else {
-        console.log('CSV data already exists in local storage');
+        csvData = await response.json();
+        console.log('Data loaded successfully');
+        console.log(csvData);
+    } catch (error) {
+        console.error('Error loading data:', error);
     }
-    
-    // Parse CSV data
-    const csvText = localStorage.getItem(storageKey);
-    csvData = parseCSV(csvText);
 }
 
-// Function to parse CSV data
-function parseCSV(csvText) {
-    const lines = csvText.split('\n');
-    const headers = lines[0].split(',');
-    return lines.slice(1).map(line => {
-        const values = line.split(',');
-        return headers.reduce((obj, header, index) => {
-            obj[header.trim()] = values[index];
-            return obj;
-        }, {});
-    });
-}
 
 // Function to get autocomplete suggestions
 function getAutocompleteSuggestions(input) {
@@ -46,17 +23,25 @@ function getAutocompleteSuggestions(input) {
     
     const isNumeric = /^\d+$/.test(input);
     
-    return csvData
+    const filteredResults = csvData
         .filter(item => {
             if (isNumeric) {
                 // If input is numeric, search in Index
-                return item.Index && item.Index.toLowerCase().startsWith(input.toLowerCase());
+                // Convert both to strings for comparison
+                const itemIndex = String(item.Index);
+                return itemIndex === input || itemIndex.startsWith(input);
             } else {
                 // If input is text, search in DEN_BOT
                 return item.DEN_BOT && item.DEN_BOT.toLowerCase().includes(input.toLowerCase());
             }
-        })
-        .map(item => ({Index: item.Index, DEN_BOT: item.DEN_BOT}))
+        });
+
+    // Console log the exact match 
+    const exactMatch = filteredResults.find(item => String(item.Index) === input);
+    console.log('Exact match for input "' + input + '":', exactMatch);
+
+    return filteredResults
+        .map(item => ({Index: String(item.Index), DEN_BOT: item.DEN_BOT}))
         .sort((a, b) => parseInt(a.Index) - parseInt(b.Index)) // Sort by Index
         .slice(0, 10); // Limit to 10 suggestions
 }
@@ -108,13 +93,13 @@ function showAutocomplete(input) {
 }
 
 // Load CSV data when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    loadAndStoreCSV();
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadCSV();  // Wait for CSV to load before setting up event listeners
     
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', () => {
         showAutocomplete(searchInput);
-        console.log('User is typing:', searchInput.value);  // New line to print as user types
+        console.log('User is typing:', searchInput.value);
     });
     
     // Close dropdown when clicking outside
