@@ -31,11 +31,10 @@ def test_ee():
 def test_export():
     test_export_tif_image_dynamic_size()
 
-def test_nicfi_image_collection_by_month():
-    nicfi_image_collection_by_month('2024-09')
 
 
 if __name__ == "__main__":
 
     initialize_ee()
     get_feature_by_index(133)
+    get_nicfi_image_by_month('2024-09', '2024-10')
