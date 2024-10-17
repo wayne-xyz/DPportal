@@ -44,6 +44,9 @@ body {
     margin-right: 20px; /* Add some space between map and results */
     max-width: 600px;
 }
+.hidden{
+    display: none !important;
+}
 
 #results {
     flex: 1; /* Add this */

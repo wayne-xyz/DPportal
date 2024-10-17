@@ -8,13 +8,14 @@ fetch('/get_esri_api_key')
       esriConfig.apiKey = data.api_key;
     
       const map = new Map({
-        basemap: "arcgis/imagery" // basemap styles service
+        // change to hybrid basemap
+        basemap: "arcgis/imagery" // basemap styles service 
       });
     
       const view = new MapView({
         map: map,
-        center: [-118.805, 34.027], // Longitude, latitude
-        zoom: 13, // Zoom level
+        center: [-75.015, -9.19], // Longitude, latitude for Peru
+        zoom: 5, // Adjusted zoom level for better view of Peru
         container: "map" // Div element
       });
     
