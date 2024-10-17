@@ -2,5 +2,11 @@ cron:
 
 - description: "48 hours task to save the static data"
   url: /daily_task
-  schedule: "every 48 hours"
-  timezone: "UTC"
+  schedule: every 48 hours
+  timezone: UTC
+
+- description: "monthly task to update the static data"
+  url: /update_task
+  schedule: 15 of month 00:00
+  timezone: UTC
+

@@ -5,6 +5,7 @@ from daily_task import perform_static_data_saving_csv
 import json
 from datetime import datetime
 import csv
+from update_task import schedule_task_download_last_month
 
 app = Flask(__name__, static_folder='static')
 
@@ -38,15 +39,22 @@ def data_statics():
     
     return render_template('data_statics.html', data=data)
 
-
-# daily task to update the static data
+# ========================== corn job task ==========================
+#  corn job task to update the static data    
 @app.route('/daily_task')
 def daily_task():
     perform_static_data_saving_csv()
     return jsonify({'status': 'success'})
 
 
+# using the cron.yaml to run the update_task function
+@app.route('/update_task')
+def update_task():
+    print("update_task", datetime.now())
+    schedule_task_download_last_month()
+    return jsonify({'status': 'success'})
 
+# ========================== corn job task ==========================
 
 
 # search the files in the target folders
@@ -71,12 +79,6 @@ def search():
     ]
 
     return jsonify(formatted_results)
-
-# using the cron.yaml to run the update_task function
-@app.route('/update_task')
-def update_task():
-
-    return jsonify({'status': 'success'})
 
 
 # TODO: fix the limit only for the javascript fetch request and from the same origin

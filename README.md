@@ -14,6 +14,11 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Update Log
+- 2024/10/15
+    - add new target index csv file( target rule: AREA_HA > 0.1 and 133 ), based on target index to perform the download task
+    - add auto download the last month tif file to the drive, using the cron job of the google cloud scheduler
+
+
 - 2024/10/14
     - New page for the static data
     - Daily update of the static data using the app engine cron job with google cloud scheduler
@@ -42,7 +47,7 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Version 1.0 Features 
-- Search for files in Google Drive, by the index number of dumpsite.
+- Search for files in Google Drive, by the index number of dumpsite, and the name of dumpsite.
 - Preview jpeg files, only jpeg files are supported.
 - Download file, both jpeg and tif files are supported.
 - Include the tif:sentinel(2024), nicfi(2024), jpeg: EsriworldImagery.
@@ -91,6 +96,11 @@ gcloud app versions list
 ```
 
 gcloud app deploy --promote --version=YOUR_VERSION_ID
+```
+
+5. Deploy the cron.yaml file
+```
+gcloud app deploy cron.yaml
 ```
 
 Monitor the app's logs:
