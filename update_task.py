@@ -152,12 +152,12 @@ def check_ee_task_list():
 
 
 # monthly task to download the tif file from the gee and save them in drive
-def download_month_tif_file(nicfi_image, month_str):
+def download_tif_file(start_month_str, end_month_str):
     #  month_str format: YYYY-MM
     if nicfi_image is None:
         if is_production():
             print("No NICFI image found, try to get the image from the gee")
-        nicfi_image=nicfi_image_collection_by_month(month_str)
+        nicfi_image=get_nicfi_image_by_month(start_month_str, end_month_str)
     else:
         if is_production():
             print("NICFI image found")
@@ -224,11 +224,35 @@ def download_month_tif_file(nicfi_image, month_str):
 
 
 
-
-def manuly_download_tif_file(index, month_str):
+#  function to manuly download the tif file for the index
+def manuly_download_tif_file(index, start_month_str, end_month_str):
     # manuly download the tif file for the index
     # 1. get the nicfi image from the gee
     # 2. perform the export_tif_image_dynamic_size function
+
+    # get the nicfi image from the gee
+    nicfi_image=get_nicfi_image_by_month(start_month_str, end_month_str)
+
+    # get the feature by the index
+    feature=get_feature_by_index(index)
+
+    if is_production():
+        nicfi_export_folder_name=NICFI_FOLDER_NAME
+        sentinel_export_folder_name=SENTINEL_FOLDER_NAME
+    else:
+        print("Not in the production environment, use the dev_test folder", DEV_TEST_FOLDER_NAME)
+        nicfi_export_folder_name=DEV_TEST_FOLDER_NAME
+        sentinel_export_folder_name=DEV_TEST_FOLDER_NAME
+    
+
+
+    # perform the export_tif_image_dynamic_size function
+    export_tif_image_dynamic_size(index, feature, nicfi_image, date_str='YYYYMM', source_name="nicfi", folder_name=DEV_TEST_FOLDER_PREFIX, shape_size=size_value_ha)
+
+
+
+
+
     pass
 
 
@@ -237,7 +261,7 @@ def manuly_download_tif_file(index, month_str):
 
 
 
-
+#  function to get the nicfi image by the start month and end month
 def get_nicfi_image_by_month(start_month_str, end_month_str):
     #  paramter format: YYYY-MM
     #  change to ee datas format
@@ -255,6 +279,8 @@ def get_nicfi_image_by_month(start_month_str, end_month_str):
         print(f"The image collection date is {image_collection_date}")
     return image_collection
 
+
+#  function to get the feature by the index
 def get_feature_by_index(index):
     # get the feature by the index
     shapefile_table=ee.FeatureCollection(SHARED_ASSETS_ID)
@@ -264,54 +290,6 @@ def get_feature_by_index(index):
     return feature
 
 
-
-
-#  function to get the nicfi image collection from the nicfi_image_collection. it will get the month_str and +1 month range to get the image collection
-def nicfi_image_collection_by_month(month_str):
-    #  paramter format: YYYY-MM
-
-
-    initialize_ee()
-    nicfi = ee.ImageCollection(NICFI_IMAGE_PROJECT)
-    
-    # Parse the input month
-    current_month = datetime.datetime.strptime(month_str, '%Y-%m')
-    
-    # Calculate the start of the next month
-    after_month = current_month.replace(day=1) + datetime.timedelta(days=32)
-    after_month = after_month.replace(day=1)
-    
-    # Format dates for Earth Engine
-    current_month_str = current_month.strftime('%Y-%m-%d')
-    after_month_str = after_month.strftime('%Y-%m-%d')
-    
-    print(f"Date range: {current_month_str} to {after_month_str}")
-    
-    # Filter the image collection
-    image_collection = nicfi.filter(ee.Filter.date(current_month_str, after_month_str))
-    
-    # Get the first image from the collection
-    first_image = image_collection.first()
-    
-    if first_image:
-        # Get the system:time_start property
-        image_time_start = first_image.get('system:time_start')
-        
-        # Convert the milliseconds since epoch to a datetime object
-        image_date = datetime.datetime.fromtimestamp(image_time_start.getInfo() / 1000)
-        
-        print(f"The image date is {image_date}")
-        
-        # You can add more processing here if needed
-        # For example, getting the image ID or other properties
-        image_id = first_image.get('system:index').getInfo()
-        print(f"Image ID: {image_id}")
-        
-    else:
-        print("No images found in the collection for the specified date range.")
-
-    # You can return the image or any other relevant information here if needed
-    return first_image
 
 
 

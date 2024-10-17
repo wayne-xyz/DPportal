@@ -1,7 +1,7 @@
 from drive_utils import perform_static_data_saving_csv, get_folder_id, search_in_folder, count_files_in_date_folder
 import time
 
-from update_task import test_ee_connection,test_export_tif_image_dynamic_size,monthly_task,nicfi_image_collection_by_month,get_nicfi_image_by_month,initialize_ee,get_feature_by_index
+from update_task import test_ee_connection,test_export_tif_image_dynamic_size,monthly_task,get_nicfi_image_by_month,initialize_ee,get_feature_by_index
 
 
 # how to run the test
