@@ -317,6 +317,7 @@ def schedule_task_download_last_month():
     end_date = datetime.datetime.now().strftime("%Y-%m-%d")
     
     # check the nicfi soucre have the new date range image or not
+    initialize_ee()
     nicfi_source = NICFISource()
     collection = nicfi_source.get_collection(start_date, end_date)
     if collection.size().getInfo() == 0:
