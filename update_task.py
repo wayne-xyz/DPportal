@@ -287,9 +287,11 @@ def download_tif_file(source_type: str, start_date: str, end_date: str):
 
     downloader = TifDownloader(image_source, start_date, end_date)
     
-    if not downloader.is_ee_tasklist_clear():
-        print("There are still running or waiting tasks in Earth Engine. Please wait for them to complete before starting a new download.")
-        return
+    while not downloader.is_ee_tasklist_clear():
+        print("There are still running or waiting tasks in Earth Engine. Waiting for 10 minutes before checking again.")
+        time.sleep(600)  # Wait for 10 minutes (600 seconds)
+        
+    print("Earth Engine task list is clear. Proceeding with the download.")
 
     print(f"Found {collection_size} images for {source_type} in the date range {start_date} to {end_date}. Starting download...")
     downloader.download_all()

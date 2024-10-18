@@ -1,4 +1,4 @@
-from update_task import download_tif_file_by_index ,schedule_task_download_last_month
+from update_task import download_tif_file_by_index ,schedule_task_download_last_month, cancel_all_ee_tasks
 import time
 from datetime import datetime, timedelta
 #  set to the folder name in the drive
