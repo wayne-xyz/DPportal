@@ -54,6 +54,7 @@ window.performSearch = function() {
     loadMapping(async function(strMapping) {
         const searchTerm = document.getElementById('searchInput').value;
         const resultsContainer = document.getElementById('results');
+        const mapContainer = document.getElementById('map'); // control the map container show or hide
 
         // Clear previous results
         resultsContainer.innerHTML = '';
@@ -106,8 +107,25 @@ window.performSearch = function() {
 
             if (parsedData.length === 0) {
                 resultsContainer.innerHTML = '<p>No results found.</p>';
+                mapContainer.classList.add('hidden'); // Hide the map
+                window.hidePeruLayer();
                 return;
             }
+
+            //  contro the mapview show and perform the zoom to the feature
+
+            // Show the map when results are found
+            mapContainer.classList.remove('hidden');
+            
+            window.showPeruLayer();
+
+            // convert the search item to the integer value and zoom to the feature
+            const indexValue = parseInt(searchTerm);
+            window.zoomToFeature(indexValue);
+             
+
+            
+
             // Group results by folder
             const groupedResults = parsedData.reduce((acc, item) => {
                 if (!acc[item.folder]) {
@@ -256,6 +274,7 @@ window.performSearch = function() {
         } catch (error) {
             console.error('Error:', error);
             resultsContainer.innerHTML = '<p>An error occurred while searching. Please try again.</p>';
+            mapContainer.classList.add('hidden'); // Hide the map on error
         }
     });
 };

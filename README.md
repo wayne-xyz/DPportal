@@ -6,14 +6,19 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 ## Developing ToDo List
 - [X] Support search by name of dumpsite ( auto-complete typing)
 - [X] migrate all the jpeg files from OneDrive to Google Drive 
-- [ ] Monthly update of jpeg files and tif files collection functionality, both nicfi and sentinel
-- [ ] Map viewer functionality
+- [X] Monthly update of tif files collection functionality, both nicfi and sentinel
+- [X] Map viewer functionality
 - [X] Long term authentication for Google Drive API, limitation for user
 - [ ] Zip downloading functionality
 - [X] UI and Description update, more readable and user-friendly
 
 
 ## Update Log
+- 2024/10/17
+    - add the mapview function conncet with the feature layer of the dumpsite, using the maps.arcgis.com to host the feature layer
+    - using the Javascript sdk of Arcgis to load the mapview and the feature layer
+
+
 - 2024/10/15
     - add new target index csv file( target rule: AREA_HA > 0.1 and 133 ), based on target index to perform the download task
     - add auto download the last month tif file to the drive, using the cron job of the google cloud scheduler
