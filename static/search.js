@@ -108,11 +108,23 @@ window.performSearch = function() {
             if (parsedData.length === 0) {
                 resultsContainer.innerHTML = '<p>No results found.</p>';
                 mapContainer.classList.add('hidden'); // Hide the map
+                window.hidePeruLayer();
                 return;
             }
 
+            //  contro the mapview show and perform the zoom to the feature
+
             // Show the map when results are found
             mapContainer.classList.remove('hidden');
+            
+            window.showPeruLayer();
+
+            // convert the search item to the integer value and zoom to the feature
+            const indexValue = parseInt(searchTerm);
+            window.zoomToFeature(indexValue);
+             
+
+            
 
             // Group results by folder
             const groupedResults = parsedData.reduce((acc, item) => {
