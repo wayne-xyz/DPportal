@@ -8,6 +8,7 @@ from ee.ee_exception import EEException
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 import time
+from datetime import datetime, timedelta
 
 # Constants
 SERVICE_ACCOUNT_KEY_FILE = 'stone-armor-430205-e2-2cd696d4afcd.json'
@@ -96,7 +97,8 @@ class TifDownloader:
         self.end_date = end_date
         self.drive_folder = self.get_drive_folder()
         self.shapefile_table = self.get_shapefile_table()
-        self.task_count = 0
+        self._task_count = 0
+        print(f"Initial task count: {self._task_count}")
         self.pending_tasks = []
 
     def get_drive_folder(self):
@@ -157,7 +159,7 @@ class TifDownloader:
             fileNamePrefix=f"{ind}-{date_str}-{source_name}"
         )
         self.pending_tasks.append(task)
-        self.task_count += 1
+        self.task_count += 1  # This will now trigger the print statement
         print(f"Export task created for index {ind} with date {date_str}")
 
     def export_tif_for_index(self, index: int, feature: ee.Feature, collection: ee.ImageCollection, start_date: str, end_date: str):
@@ -170,6 +172,16 @@ class TifDownloader:
         
         self.export_tif_image_dynamic_size(index, feature, image, date_str, source_name, shape_size)
 
+    @property
+    def task_count(self):
+        return self._task_count
+
+    @task_count.setter
+    def task_count(self, value):
+        if value != self._task_count:
+            print(f"Task count changed: {self._task_count} -> {value}")
+            self._task_count = value
+
     def wait_for_tasks_completion(self):
         while self.pending_tasks:
             time.sleep(TASK_CHECK_INTERVAL)
@@ -178,7 +190,7 @@ class TifDownloader:
                 status = task.status()['state']
                 if status in ['COMPLETED', 'FAILED', 'CANCELLED']:
                     completed_tasks.append(task)
-                    self.task_count -= 1
+                    self.task_count -= 1  # This will now trigger the print statement
                     print(f"Task {task.id} {status}")
             self.pending_tasks = [task for task in self.pending_tasks if task not in completed_tasks]
 
@@ -193,10 +205,10 @@ class TifDownloader:
         return all(task.state not in ['READY', 'RUNNING'] for task in tasks)
 
 
-
+# download all the tif files for all the target indices
     def download_all(self):
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
-        print(f"Starting TIF file download for all target indices, source: {source_name}, folder: {self.drive_folder}, period {self.start_date} to {self.end_date}: {datetime.datetime.now()}")
+        print(f"Starting TIF file download for all target indices, source: {source_name}, folder: {self.drive_folder}, period {self.start_date} to {self.end_date}: {datetime.now()}")
         
         for start_date, end_date in self.image_source.get_export_dates(self.start_date, self.end_date):
             for index in TARGET_INDEX_LIST:
@@ -210,9 +222,10 @@ class TifDownloader:
         # Wait for all remaining tasks to complete
         self.wait_for_tasks_completion()
 
+    # download the tif file for the given index, start date and end date
     def download_single(self, index: int):
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
-        print(f"Starting TIF file download for index {index}, source: {source_name}, period {self.start_date} to {self.end_date}: {datetime.datetime.now()}")
+        print(f"Starting TIF file download for index {index}, source: {source_name}, period {self.start_date} to {self.end_date}: {datetime.now()}")
         
         for start_date, end_date in self.image_source.get_export_dates(self.start_date, self.end_date):
             self.process_index(index, start_date, end_date)
@@ -249,9 +262,7 @@ def download_tif_file_by_index(index: int, source_type: str, start_date: str, en
         print(f"No images found for {source_type} in the date range {start_date} to {end_date}.")
         return
     
-    if not downloader.is_ee_tasklist_clear():
-        print("There are still running or waiting tasks in Earth Engine. Please wait for them to complete before starting a new download.")
-        return
+
 
     print(f"Found {collection_size} images for {source_type} in the date range {start_date} to {end_date}. Starting download...")
     downloader.download_single(index)
@@ -276,9 +287,11 @@ def download_tif_file(source_type: str, start_date: str, end_date: str):
 
     downloader = TifDownloader(image_source, start_date, end_date)
     
-    if not downloader.is_ee_tasklist_clear():
-        print("There are still running or waiting tasks in Earth Engine. Please wait for them to complete before starting a new download.")
-        return
+    while not downloader.is_ee_tasklist_clear():
+        print("There are still running or waiting tasks in Earth Engine. Waiting for 10 minutes before checking again.")
+        time.sleep(600)  # Wait for 10 minutes (600 seconds)
+        
+    print("Earth Engine task list is clear. Proceeding with the download.")
 
     print(f"Found {collection_size} images for {source_type} in the date range {start_date} to {end_date}. Starting download...")
     downloader.download_all()
@@ -300,24 +313,60 @@ def cancel_all_ee_tasks():
 
 
 
-def schedule_task_download_last_month():
-    # get the last month date
-    last_month = datetime.datetime.now() - datetime.timedelta(days=30)
-    start_date = last_month.strftime("%Y-%m-%d")
-    end_date = datetime.datetime.now().strftime("%Y-%m-%d")
+def get_last_month_range():
+    # Get the current date
+    today = datetime.now()
     
-    # check the nicfi soucre have the new date range image or not
+    # Get the first day of the current month
+    first_of_current_month = today.replace(day=1)
+    
+    # Get the last day of the previous month
+    last_day_of_previous_month = first_of_current_month - timedelta(days=1)
+    
+    # Get the first day of the previous month
+    first_of_previous_month = last_day_of_previous_month.replace(day=1)
+    
+    # Format dates as strings
+    start_date = first_of_previous_month.strftime('%Y-%m-%d')
+    end_date = first_of_current_month.strftime('%Y-%m-%d')
+    
+    return start_date, end_date
+
+# Update the schedule_task_download_last_month function
+def schedule_task_download_last_month():
+    start_date, end_date = get_last_month_range()
+    
+    # check if the nicfi source has new images for the date range
+    initialize_ee()
+
+    #  check the ee task list is clear or not
+    def is_ee_tasklist_clear(self):
+        tasks = ee.batch.Task.list()
+        return all(task.state not in ['READY', 'RUNNING'] for task in tasks)
+    
+    # Wait until the EE task list is clear
+    while not is_ee_tasklist_clear():
+        print("Earth Engine task list is not clear. Waiting for 10 minutes before checking again.")
+        time.sleep(600)  # Wait for 10 minutes (600 seconds)
+
+    # check the nicfi source has new images for the date range
     nicfi_source = NICFISource()
     collection = nicfi_source.get_collection(start_date, end_date)
     if collection.size().getInfo() == 0:
         print(f"No new images found for the date range {start_date} to {end_date}")
+        write_monthly_task_log('No new nicfi images found for the date range', str(start_date), str(end_date))
         return
     
+
     # download the new images
     download_tif_file('nicfi', start_date, end_date)
+    write_monthly_task_log('Downloaded nicfi images from', str(start_date), str(end_date))
 
-    
 
+def write_monthly_task_log(log:str,start_date:str, end_date:str):
+    # put the log file into the /static/data/monthly_task_log.txt 
+    with open('static/data/monthly_task_log.txt', 'a') as log_file:
+        log_file.write(f"{log} {start_date} {end_date}\n")
 
 
 def main():
@@ -325,3 +374,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
