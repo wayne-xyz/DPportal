@@ -96,7 +96,8 @@ class TifDownloader:
         self.end_date = end_date
         self.drive_folder = self.get_drive_folder()
         self.shapefile_table = self.get_shapefile_table()
-        self.task_count = 0
+        self._task_count = 0
+        print(f"Initial task count: {self._task_count}")
         self.pending_tasks = []
 
     def get_drive_folder(self):
@@ -157,7 +158,7 @@ class TifDownloader:
             fileNamePrefix=f"{ind}-{date_str}-{source_name}"
         )
         self.pending_tasks.append(task)
-        self.task_count += 1
+        self.task_count += 1  # This will now trigger the print statement
         print(f"Export task created for index {ind} with date {date_str}")
 
     def export_tif_for_index(self, index: int, feature: ee.Feature, collection: ee.ImageCollection, start_date: str, end_date: str):
@@ -170,6 +171,16 @@ class TifDownloader:
         
         self.export_tif_image_dynamic_size(index, feature, image, date_str, source_name, shape_size)
 
+    @property
+    def task_count(self):
+        return self._task_count
+
+    @task_count.setter
+    def task_count(self, value):
+        if value != self._task_count:
+            print(f"Task count changed: {self._task_count} -> {value}")
+            self._task_count = value
+
     def wait_for_tasks_completion(self):
         while self.pending_tasks:
             time.sleep(TASK_CHECK_INTERVAL)
@@ -178,7 +189,7 @@ class TifDownloader:
                 status = task.status()['state']
                 if status in ['COMPLETED', 'FAILED', 'CANCELLED']:
                     completed_tasks.append(task)
-                    self.task_count -= 1
+                    self.task_count -= 1  # This will now trigger the print statement
                     print(f"Task {task.id} {status}")
             self.pending_tasks = [task for task in self.pending_tasks if task not in completed_tasks]
 
@@ -193,7 +204,7 @@ class TifDownloader:
         return all(task.state not in ['READY', 'RUNNING'] for task in tasks)
 
 
-
+# download all the tif files for all the target indices
     def download_all(self):
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
         print(f"Starting TIF file download for all target indices, source: {source_name}, folder: {self.drive_folder}, period {self.start_date} to {self.end_date}: {datetime.datetime.now()}")
@@ -210,6 +221,7 @@ class TifDownloader:
         # Wait for all remaining tasks to complete
         self.wait_for_tasks_completion()
 
+    # download the tif file for the given index, start date and end date
     def download_single(self, index: int):
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
         print(f"Starting TIF file download for index {index}, source: {source_name}, period {self.start_date} to {self.end_date}: {datetime.datetime.now()}")
@@ -249,9 +261,7 @@ def download_tif_file_by_index(index: int, source_type: str, start_date: str, en
         print(f"No images found for {source_type} in the date range {start_date} to {end_date}.")
         return
     
-    if not downloader.is_ee_tasklist_clear():
-        print("There are still running or waiting tasks in Earth Engine. Please wait for them to complete before starting a new download.")
-        return
+
 
     print(f"Found {collection_size} images for {source_type} in the date range {start_date} to {end_date}. Starting download...")
     downloader.download_single(index)
@@ -316,8 +326,6 @@ def schedule_task_download_last_month():
     # download the new images
     download_tif_file('nicfi', start_date, end_date)
 
-    
-
 
 
 def main():
@@ -325,3 +333,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
