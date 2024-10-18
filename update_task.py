@@ -336,6 +336,18 @@ def schedule_task_download_last_month():
     
     # check if the nicfi source has new images for the date range
     initialize_ee()
+
+    #  check the ee task list is clear or not
+    def is_ee_tasklist_clear(self):
+        tasks = ee.batch.Task.list()
+        return all(task.state not in ['READY', 'RUNNING'] for task in tasks)
+    
+    # Wait until the EE task list is clear
+    while not is_ee_tasklist_clear():
+        print("Earth Engine task list is not clear. Waiting for 10 minutes before checking again.")
+        time.sleep(600)  # Wait for 10 minutes (600 seconds)
+
+    # check the nicfi source has new images for the date range
     nicfi_source = NICFISource()
     collection = nicfi_source.get_collection(start_date, end_date)
     if collection.size().getInfo() == 0:
