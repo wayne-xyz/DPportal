@@ -5,3 +5,5 @@ stone-armor-430205-e2-2cd696d4afcd.json
 stone-armor-430205-e2-9913c17acb94.json
 # ... other entries ...
 esri_api_key.json
+*.pyc
+__pycache__/
