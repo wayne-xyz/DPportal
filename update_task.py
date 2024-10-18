@@ -340,11 +340,19 @@ def schedule_task_download_last_month():
     collection = nicfi_source.get_collection(start_date, end_date)
     if collection.size().getInfo() == 0:
         print(f"No new images found for the date range {start_date} to {end_date}")
+        write_monthly_task_log('No new nicfi images found for the date range', str(start_date), str(end_date))
         return
     
+
     # download the new images
     download_tif_file('nicfi', start_date, end_date)
+    write_monthly_task_log('Downloaded nicfi images from', str(start_date), str(end_date))
 
+
+def write_monthly_task_log(log:str,start_date:str, end_date:str):
+    # put the log file into the /static/data/monthly_task_log.txt 
+    with open('static/data/monthly_task_log.txt', 'a') as log_file:
+        log_file.write(f"{log} {start_date} {end_date}\n")
 
 
 def main():
