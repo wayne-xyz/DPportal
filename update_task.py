@@ -8,6 +8,7 @@ from ee.ee_exception import EEException
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 import time
+from datetime import datetime, timedelta
 
 # Constants
 SERVICE_ACCOUNT_KEY_FILE = 'stone-armor-430205-e2-2cd696d4afcd.json'
@@ -207,7 +208,7 @@ class TifDownloader:
 # download all the tif files for all the target indices
     def download_all(self):
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
-        print(f"Starting TIF file download for all target indices, source: {source_name}, folder: {self.drive_folder}, period {self.start_date} to {self.end_date}: {datetime.datetime.now()}")
+        print(f"Starting TIF file download for all target indices, source: {source_name}, folder: {self.drive_folder}, period {self.start_date} to {self.end_date}: {datetime.now()}")
         
         for start_date, end_date in self.image_source.get_export_dates(self.start_date, self.end_date):
             for index in TARGET_INDEX_LIST:
@@ -224,7 +225,7 @@ class TifDownloader:
     # download the tif file for the given index, start date and end date
     def download_single(self, index: int):
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
-        print(f"Starting TIF file download for index {index}, source: {source_name}, period {self.start_date} to {self.end_date}: {datetime.datetime.now()}")
+        print(f"Starting TIF file download for index {index}, source: {source_name}, period {self.start_date} to {self.end_date}: {datetime.now()}")
         
         for start_date, end_date in self.image_source.get_export_dates(self.start_date, self.end_date):
             self.process_index(index, start_date, end_date)
@@ -310,13 +311,30 @@ def cancel_all_ee_tasks():
 
 
 
-def schedule_task_download_last_month():
-    # get the last month date
-    last_month = datetime.datetime.now() - datetime.timedelta(days=30)
-    start_date = last_month.strftime("%Y-%m-%d")
-    end_date = datetime.datetime.now().strftime("%Y-%m-%d")
+def get_last_month_range():
+    # Get the current date
+    today = datetime.now()
     
-    # check the nicfi soucre have the new date range image or not
+    # Get the first day of the current month
+    first_of_current_month = today.replace(day=1)
+    
+    # Get the last day of the previous month
+    last_day_of_previous_month = first_of_current_month - timedelta(days=1)
+    
+    # Get the first day of the previous month
+    first_of_previous_month = last_day_of_previous_month.replace(day=1)
+    
+    # Format dates as strings
+    start_date = first_of_previous_month.strftime('%Y-%m-%d')
+    end_date = first_of_current_month.strftime('%Y-%m-%d')
+    
+    return start_date, end_date
+
+# Update the schedule_task_download_last_month function
+def schedule_task_download_last_month():
+    start_date, end_date = get_last_month_range()
+    
+    # check if the nicfi source has new images for the date range
     initialize_ee()
     nicfi_source = NICFISource()
     collection = nicfi_source.get_collection(start_date, end_date)
@@ -334,6 +352,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
