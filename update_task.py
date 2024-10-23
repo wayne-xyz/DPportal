@@ -104,9 +104,9 @@ class TifDownloader:
     def get_drive_folder(self):
         task_data = read_task_yaml()
         if isinstance(self.image_source, NICFISource):
-            return task_data['nicfi_folder_name'] if is_production() else task_data['dev_test_folder_name']
+            return task_data['nicfi_folder_name'] 
         elif isinstance(self.image_source, SentinelSource):
-            return task_data['sentinel_folder_name'] if is_production() else task_data['dev_test_folder_name']
+            return task_data['sentinel_folder_name'] 
         else:
             raise ValueError("Unknown image source type")
 
