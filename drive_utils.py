@@ -4,18 +4,25 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 from google.auth.exceptions import RefreshError
-import csv
-from collections import defaultdict
-import re
 import os
-
+from datetime import datetime
 import time
+import tempfile
+import logging
 
 
 # For save the static data to the csv file 
 STATIC_DATE_START= "202301"
 STATIC_DATE_END= "202407"
-STATIC_CSV_FILE_PATH='static/data/static_data.csv'
+def get_temp_file_path(file_name):
+    if os.getenv('GAE_ENV', '').startswith('standard'): 
+        # running on google app engine
+        return os.path.join('/tmp', file_name)
+    else:
+        # running locally
+        return file_name
+#  initialize the static csv file path
+STATIC_CSV_FILE_PATH=get_temp_file_path('static_data.csv')
 
 
 
@@ -26,6 +33,11 @@ DRIVE_GEE_KEY_FILE = 'stone-armor-430205-e2-2cd696d4afcd.json'
 
 if DRIVE_GEE_KEY_FILE not in os.listdir():
     DRIVE_GEE_KEY_FILE = 'stone-armor-430205-e2-9913c17acb94.json'
+
+
+
+
+
 
 
 # folder names
@@ -244,10 +256,13 @@ def count_files_in_date_folder(folder_name, current_date):
 
 
 #  iterate over the static date range and interate the files_list and save the static data to the csv file
-def perform_static_data_saving_csv():
+def perform_static_data_saving_csv(static_date_start=STATIC_DATE_START,static_date_end=STATIC_DATE_END):
     # get the static date start and end from the environment variables
-    static_date_start = STATIC_DATE_START   
-    static_date_end = STATIC_DATE_END
+    start_time = datetime.now()
+    logging.info(f"Start perform_static_data_saving_csv at {start_time}, save the static data to {STATIC_CSV_FILE_PATH}")
+    # get the current month by format YYYYMM
+    static_date_end = datetime.now().strftime('%Y%m')
+
 
     # clear the csv file content if it exists
     if os.path.exists(STATIC_CSV_FILE_PATH):
@@ -294,7 +309,11 @@ def perform_static_data_saving_csv():
         
         current_date = f"{year}{month:02d}"
 
-    # ... rest of the function ...
+    end_time = datetime.now()
+    duration = end_time - start_time
+    print(f"Total time taken: {duration}")
+    logging.info(f"End perform_static_data_saving_csv at {end_time}, total time taken: {duration}")
+
     pass 
 
 
@@ -304,16 +323,6 @@ def perform_static_data_saving_csv():
 def test_credentials():
     check_credentials()
     
-    # folder_id = get_folder_id('EsriWorldImagery_jpg')
-    # print(folder_id)
-    # print(search_in_folder(folder_id, '1822'))
-    # folder_id_sentinel=get_folder_id(sentinel_tif_folder_name)
-    # print(folder_id_sentinel)
-    # print(search_in_folder(folder_id_sentinel, '1822'))
-    # folder_id_nicfi=get_folder_id(nicfi_folder_name)
-    # print(folder_id_nicfi)
-    # print(search_in_folder(folder_id_nicfi, '1822'))
-
     rewrite_update_log()
 
 # main function to run the script

@@ -3,14 +3,16 @@ import time
 
 from update_task import initialize_ee,download_tif_file_by_index
 
+def test_static_data():
+    perform_static_data_saving_csv()
 
 # how to run the test
 # python3 test.py
 
 def main():
     initialize_ee()
-    download_tif_file_by_index(133,'nicfi', '2024-10-01', '2024-11-01')
-    download_tif_file_by_index(133,'sentinel', '2024-10-01', '2024-11-01')
+    test_static_data()
+
 
 
 

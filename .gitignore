@@ -7,3 +7,17 @@ stone-armor-430205-e2-9913c17acb94.json
 esri_api_key.json
 *.pyc
 __pycache__/
+# The line "**/test.py" might not be working because of incorrect syntax or placement.
+# Here are a few alternatives you can try:
+
+# Option 1: Remove the leading "**/", which matches any directory depth
+test.py
+
+# Option 2: Use a single "*" to match any directory depth
+*/test.py
+
+# Option 3: Explicitly ignore test.py in the root and all subdirectories
+/test.py
+**/test.py
+
+# Choose the option that best fits your project structure

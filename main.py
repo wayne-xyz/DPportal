@@ -7,6 +7,7 @@ from datetime import datetime
 import csv
 from update_task import schedule_task_download_last_month
 import pandas as pd
+import logging
 
 app = Flask(__name__, static_folder='static')
 
@@ -45,16 +46,38 @@ def data_statics():
 #  corn job task to update the static data    
 @app.route('/daily_task')
 def daily_task():
-    perform_static_data_saving_csv()
-    return jsonify({'status': 'success'})
+
+    start_time = datetime.now()
+    logging.info(f"Start daily_task at {start_time}")
+
+    try:
+        # Perform the task directly
+        perform_static_data_saving_csv()
+        
+        end_time = datetime.now()
+        duration = end_time - start_time
+        logging.info(f"End daily_task Success at {end_time}. Total time taken: {duration}")
+        
+        return jsonify({
+            'status': 'success',
+            'start_time': start_time.isoformat(),
+            'end_time': end_time.isoformat(),
+            'duration': str(duration)
+        })
+    
+    except Exception as e:
+        logging.error(f"Error in daily_task: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 # using the cron.yaml to run the update_task function
 @app.route('/update_task')
 def update_task():
-    print("update_task", datetime.now())
-    schedule_task_download_last_month()
-    return jsonify({'status': 'success'})
+    try:
+        schedule_task_download_last_month()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 # ========================== corn job task ==========================
 
