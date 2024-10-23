@@ -260,6 +260,7 @@ def perform_static_data_saving_csv(static_date_start=STATIC_DATE_START,static_da
     # get the static date start and end from the environment variables
     start_time = datetime.now()
     logging.info(f"Start perform_static_data_saving_csv at {start_time}, save the static data to {STATIC_CSV_FILE_PATH}")
+    print(f"Start perform_static_data_saving_csv at {start_time}, save the static data to {STATIC_CSV_FILE_PATH}")
     # get the current month by format YYYYMM
     static_date_end = datetime.now().strftime('%Y%m')
 
@@ -312,6 +313,7 @@ def perform_static_data_saving_csv(static_date_start=STATIC_DATE_START,static_da
     end_time = datetime.now()
     duration = end_time - start_time
     print(f"Total time taken: {duration}")
+    print("File saved to ", STATIC_CSV_FILE_PATH)
     logging.info(f"End perform_static_data_saving_csv at {end_time}, total time taken: {duration}")
 
     pass 
