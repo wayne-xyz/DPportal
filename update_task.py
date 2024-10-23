@@ -160,7 +160,7 @@ class TifDownloader:
         )
         self.pending_tasks.append(task)
         self.task_count += 1  # This will now trigger the print statement
-        print(f"Export task created for index {ind} with date {date_str}")
+        print(f"Export task created for index {ind} with date {date_str},save to folder {self.drive_folder}")
 
     def export_tif_for_index(self, index: int, feature: ee.Feature, collection: ee.ImageCollection, start_date: str, end_date: str):
         df = pd.read_csv(SHAPEFILE_DATA_PATH)

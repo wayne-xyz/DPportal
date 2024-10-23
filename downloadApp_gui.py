@@ -57,7 +57,7 @@ class DownloadApp:
                 return
             
             # Update UI
-            self.status_var.set("Downloading...")
+            self.status_var.set("Submitting tasks...")
             self.download_btn.state(['disabled'])
             self.progress.start()
             
