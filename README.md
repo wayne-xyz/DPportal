@@ -9,11 +9,14 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 - [X] Monthly update of tif files collection functionality, both nicfi and sentinel
 - [X] Map viewer functionality
 - [X] Long term authentication for Google Drive API, limitation for user
-- [ ] Zip downloading functionality
 - [X] UI and Description update, more readable and user-friendly
 
 
 ## Update Log
+- 2024/10/23
+    - add GUI for manual download tif files
+    - add the new Cloud task feature with the cron job to perform the download task and statistics update
+
 - 2024/10/17
     - add the mapview function conncet with the feature layer of the dumpsite, using the maps.arcgis.com to host the feature layer
     - using the Javascript sdk of Arcgis to load the mapview and the feature layer
