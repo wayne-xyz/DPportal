@@ -22,7 +22,9 @@ SHAPEFILE_DATA_PATH = 'static/data/Shapefile_data_20240819.csv' # the path to th
 MAX_CONCURRENT_TASKS = 2000
 TASK_CHECK_INTERVAL = 600  # seconds
 
-
+# mac and windows have different service account key files
+if SERVICE_ACCOUNT_KEY_FILE not in os.listdir():
+    SERVICE_ACCOUNT_KEY_FILE = 'stone-armor-430205-e2-9913c17acb94.json'
 
 
 # Utility functions
