@@ -62,7 +62,7 @@ def get_all_files_names_in_drive_folder(folder_name):
 
 
 #  main functioin to parse all 4 folders'files'names to csv file by monthly show them in the csv file, to be a table for the data
-def parse_file_name_to_csv():
+def image_files_names_statistics_to_csv():
 
     start_time = datetime.now()
     print(f"Start to parse the file names to csv file at {start_time}")
@@ -249,6 +249,7 @@ def download_file_from_drive(file_id, file_path):
         print(f"An error occurred while downloading: {str(e)}")
 
 
+# only for testing
 def main():
     # parse_file_name_to_csv()
     
