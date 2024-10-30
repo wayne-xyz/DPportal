@@ -13,6 +13,11 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Update Log
+- 2024/10/30
+    - add the new data statistics page, using the csv from google drive 
+    - update the ui of home page and the footer to the statistics page
+
+
 - 2024/10/23
     - add GUI for manual download tif files
     - add the new Cloud task feature with the cron job to perform the download task and statistics update
