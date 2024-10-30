@@ -1,2 +1,0 @@
-Date range of sentinel_jpg: 20240101-20240620
-Date range of nicfi_jpg: 20240101-20240701

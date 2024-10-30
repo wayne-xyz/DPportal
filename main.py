@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
-from drive_utils import search_in_target_folders
+from drive_utils import search_in_target_folders,is_production,get_credentials,get_folder_id
 from daily_task import perform_static_data_saving_csv
 import json
 from datetime import datetime
@@ -10,7 +10,18 @@ import pandas as pd
 import logging
 from google.cloud import tasks_v2
 from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from imageFile_statistics import get_file_id
+
+
+
 app = Flask(__name__, static_folder='static')
+
+
+STATIC_CSV_FILE_NAME='imageFile_statistics.csv'
+STATIC_CSV_FILE_FOLDER_DRIVE='Images'
+
+
 
 # show the main page
 @app.route('/')
@@ -31,46 +42,8 @@ def parse_date(date_str):
 # show the static data page
 @app.route('/data_statistics')
 def data_statistics():
-    """Read and display data from CSV file"""
-    data = []
-    
-    # Determine the correct file path
-    if os.getenv('GAE_ENV', '').startswith('standard'):
-        csv_file_path = '/tmp/static_data.csv'
-        logging.info(f"Running on App Engine, using path: {csv_file_path}")
-    else:
-        csv_file_path = 'static_data.csv'
-        logging.info(f"Running locally, using path: {csv_file_path}")
-
-    try:
-        # Check if file exists
-        if not os.path.exists(csv_file_path):
-            logging.error(f"CSV file not found at: {csv_file_path}")
-            return jsonify({'error': 'Data file not found'}), 404
-
-        # Read the static data csv file
-        with open(csv_file_path, 'r') as csvfile:
-            csvreader = csv.DictReader(csvfile)
-            for row in csvreader:
-                row['date'] = parse_date(row['date'])
-                data.append(row)    
-        
-        logging.info(f"Successfully read {len(data)} rows from CSV")
-        
-        # Sort the data by date in descending order
-        data.sort(key=lambda x: datetime.strptime(x['date'], '%b %Y'), reverse=True)
-        
-        return render_template('data_statics.html', data=data)
-        
-    except FileNotFoundError:
-        error_msg = f"CSV file not found at: {csv_file_path}"
-        logging.error(error_msg)
-        return jsonify({'error': error_msg}), 404
-        
-    except Exception as e:
-        error_msg = f"Error reading CSV file: {str(e)}"
-        logging.error(error_msg)
-        return jsonify({'error': error_msg}), 500
+    # 
+    return render_template('data_statics.html')
 
 
 
@@ -208,6 +181,71 @@ def search():
 def get_esri_api_key():
     api_key = json.load(open('esri_api_key.json'))['ESRI_API_KEY']
     return jsonify({'api_key': api_key})
+
+
+@app.route('/get_statistics_csv')
+def get_statistics_csv():
+    """Fetch CSV from Drive and return as JSON"""
+    try:
+        creds = get_credentials()
+        service = build('drive', 'v3', credentials=creds)
+        
+        # Get folder ID
+        folder_id = get_folder_id(STATIC_CSV_FILE_FOLDER_DRIVE)
+        if not folder_id:
+            logging.error("Folder not found")
+            return jsonify({'error': 'Statistics folder not found'}), 404
+            
+        # Get file ID
+        file_id = get_file_id(STATIC_CSV_FILE_NAME, folder_id)
+        if not file_id:
+            logging.error("CSV file not found")
+            return jsonify({'error': 'Statistics file not found'}), 404
+            
+        try:
+            # Download file content
+            request = service.files().get_media(fileId=file_id)
+            content = request.execute()
+            
+            # Parse CSV content
+            csv_content = content.decode('utf-8').splitlines()
+            reader = csv.DictReader(csv_content)
+            
+            # Convert to list of dictionaries
+            data = []
+            for row in reader:
+                # Parse and format the date if needed
+                if 'Month' in row:
+                    try:
+                        # Assuming date format is 'YYYY-MM'
+                        date_obj = datetime.strptime(row['Month'], '%Y-%m')
+                        row['Month'] = date_obj.strftime('%b %Y')  # Format as 'Mar 2024'
+                    except ValueError as e:
+                        logging.warning(f"Date parsing error: {e}")
+                
+                # Convert numeric strings to integers
+                for key in ['NICFI TIF', 'NICFI JPG', 'Sentinel-2 TIF', 'Sentinel-2 JPG']:
+                    if key in row:
+                        try:
+                            row[key] = int(row[key])
+                        except ValueError:
+                            row[key] = 0
+                
+                data.append(row)
+            
+            # Sort by date (newest first)
+            data.sort(key=lambda x: datetime.strptime(x['Month'], '%b %Y'), reverse=True)
+            
+            logging.info(f"Successfully fetched and parsed CSV with {len(data)} rows")
+            return jsonify(data)
+            
+        except Exception as file_error:
+            logging.error(f"Error reading file content: {str(file_error)}")
+            return jsonify({'error': 'Failed to read statistics file'}), 500
+            
+    except Exception as e:
+        logging.error(f"Error in get_statistics_csv: {str(e)}")
+        return jsonify({'error': 'Failed to fetch statistics'}), 500
 
 
 if __name__ == '__main__':

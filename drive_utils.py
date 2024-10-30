@@ -69,9 +69,9 @@ def test_service_account_key_file():
 
 
 # use service account key file to get the credentials
-def get_credentials():
+def get_credentials(default_scopes=SCOPES):
     # using the service account key file
-    creds = service_account.Credentials.from_service_account_file(DRIVE_GEE_KEY_FILE,scopes=SCOPES)
+    creds = service_account.Credentials.from_service_account_file(DRIVE_GEE_KEY_FILE,scopes=default_scopes)
     return creds
 
 # check if the credentials are valid by calling the drive api and print a message 
