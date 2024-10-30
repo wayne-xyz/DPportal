@@ -3,6 +3,7 @@ function showLoading() {
     document.getElementById('loading').style.display = 'flex';
     document.getElementById('statistics-table').style.display = 'none';
     document.getElementById('error-message').style.display = 'none';
+    document.getElementById('statistics-title').style.display = 'none';
 }
 
 function hideLoading() {
@@ -22,6 +23,7 @@ function showError(message) {
 // Display data in table
 function displayStatistics(data) {
     const table = document.getElementById('statistics-table');
+    const title = document.getElementById('statistics-title');
     const tbody = table.querySelector('tbody');
     tbody.innerHTML = ''; // Clear existing content
     
@@ -47,10 +49,15 @@ function displayStatistics(data) {
     
     // Show table with fade-in effect
     table.style.display = 'table';
+    title.style.display = 'block';
+
+    title.style.opacity = '0';
     table.style.opacity = '0';
     setTimeout(() => {
         table.style.transition = 'opacity 0.3s ease-in';
         table.style.opacity = '1';
+        title.style.transition = 'opacity 0.3s ease-in';
+        title.style.opacity = '1';
     }, 100);
 }
 

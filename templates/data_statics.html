@@ -8,6 +8,9 @@
             text-align: center;
             padding: 50px;
             display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
         
         .spinner {
@@ -17,12 +20,18 @@
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 0 auto;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
         }
         
         /* Error message */
@@ -55,6 +64,8 @@
         .number-cell {
             text-align: right;
             font-family: monospace;
+            font-size: 18px;
+            font-weight: 500;
         }
         
         tr:nth-child(even) {
@@ -78,34 +89,69 @@
         .retry-button:hover {
             background-color: #2980b9;
         }
+        
+        .table-container {
+            margin: 20px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+        
+        .table-title {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        @media (max-width: 768px) {
+            .table-title {
+                font-size: 20px;
+            }
+        }
+        
+        .table-caption {
+            caption-side: top;
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 20px 0;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
     </style>
 </head>
 <body>
     <!-- Loading spinner -->
     <div id="loading" class="loading-container">
         <div class="spinner"></div>
-        <p>Loading statistics...</p>
+        <p class="loading-text">Loading statistics...</p>
     </div>
     
     <!-- Error message -->
     <div id="error-message" class="error-message"></div>
     
     <!-- Statistics table -->
-    <table id="statistics-table">
-        <thead>
-            <tr>
-                <th>Month</th>
-                <th>NICFI TIF</th>
-                <th>NICFI JPG</th>
-                <th>Sentinel-2 TIF</th>
-                <th>Sentinel-2 JPG</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Data will be inserted here by JavaScript -->
-        </tbody>
-    </table>
+    <div class="table-container">
+        <h2 id="statistics-title" class="table-title" style="display: none;">Monthly Download Statistics</h2>
+        <table id="statistics-table">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>NICFI TIF</th>
+                    <th>NICFI JPG</th>
+                    <th>Sentinel-2 TIF</th>
+                    <th>Sentinel-2 JPG</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
     
-    <script src="{{ url_for('static', filename='js/statistics.js') }}"></script>
+    <script src="{{ url_for('static', filename='statistics.js') }}"></script>
 </body>
 </html>
