@@ -11,7 +11,7 @@ import logging
 from google.cloud import tasks_v2
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from imageFile_statistics import get_file_id
+from imageFile_statistics import get_file_id,image_files_names_statistics_to_csv
 
 
 
@@ -62,7 +62,7 @@ except Exception as e:
 
 
 # ========================== corn job task ==========================
-#  corn job task to update the static data    
+#  corn job task to update the static data , for the statistics csv file update   
 @app.route('/daily_task')
 def daily_task():
     """Endpoint triggered by cron to create the Cloud Task"""
@@ -107,6 +107,7 @@ def daily_task():
             'message': str(e)
         }), 500
 
+#  this is the scheduled task function to update the statistics csv file
 @app.route('/process_daily_task', methods=['POST'])
 def process_daily_task():
     """Endpoint that actually processes the task"""
@@ -119,7 +120,7 @@ def process_daily_task():
 
     try:
         # Perform your long-running task
-        perform_static_data_saving_csv()
+        image_files_names_statistics_to_csv()
         
         end_time = datetime.now()
         duration = end_time - start_time
