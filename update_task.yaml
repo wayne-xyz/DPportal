@@ -4,3 +4,5 @@
 dev_test_folder_name: "dev_test"
 nicfi_folder_name: "nicfi_tif_2024"
 sentinel_folder_name: "sentinel_tif_2024"
+nicfi_jpg_folder_name: "nicfi_jpg"
+sentinel_jpg_folder_name: "sentinel_jpg"
