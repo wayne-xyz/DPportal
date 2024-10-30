@@ -23,7 +23,31 @@
             z-index: 1000;
         }
 
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
+        .stats-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            margin-right: 20px;
+        }
+
+        .stats-link:hover {
+            text-decoration: underline;
+        }
+
+        .stats-link i {
+            margin-right: 5px;
+        }
+
+
+
+        
     </style>
 </head>
 <body>
@@ -36,18 +60,21 @@
         </div>
         <div class="map-results-container">
 
-            <div id="results" class="results" style="max-height: 600px; overflow-y: auto; margin-top: 20px;">
+            <div id="results" class="results" style=" overflow-y: auto; margin-top: 20px;">
                 <!-- Search results will be updated here -->
             </div>
             <div id="map" class="hidden" ></div>
         </div>
     </div>
     <footer>
-        <div id="updateInfo"></div>
+        <div class="footer-content">
+            <a href="{{ url_for('data_statistics') }}" class="stats-link" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-chart-bar"></i> View Download Statistics
+            </a>
+        </div>
     </footer>
 
 <script src="{{ url_for('static', filename='search.js') }}"></script>
-<script src="{{ url_for('static', filename='update_log.js') }}"></script>
 </body>
 
 </html>
