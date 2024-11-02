@@ -13,6 +13,10 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Update Log
+- 2024/11/02
+    - after tried the F1 instance, it still has the problem of the memory limit, exceed the 384, so switch back to F2
+
+
 - 2024/10/30
     - add the new data statistics page, using the csv from google drive 
     - update the ui of home page and the footer to the statistics page
