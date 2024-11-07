@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkcalendar import DateEntry  # You'll need to install this: pip install tkcalendar
 from update_task import download_tif_file_by_index
+from tkinter import messagebox
 
 class DownloadOneApp:
     def __init__(self, root):
@@ -48,14 +49,15 @@ class DownloadOneApp:
     def download_file(self):
         source = self.source_name.get()
         index = self.index.get()
-        start_date = self.start_date.get_date()
-        end_date = self.end_date.get_date()
+        start_date = self.start_date.get_date().strftime('%Y-%m-%d')
+        end_date = self.end_date.get_date().strftime('%Y-%m-%d')
         
         try:
-            download_tif_file_by_index(source, index, start_date, end_date)
-            tk.messagebox.showinfo("Success", "File downloaded successfully!")
+            print(f"Downloading file with index: {index}, source: {source}, start_date: {start_date}, end_date: {end_date}")
+            download_tif_file_by_index(index, source, start_date, end_date)
+            messagebox.showinfo("Success", "File downloaded successfully!")
         except Exception as e:
-            tk.messagebox.showerror("Error", f"Failed to download file: {str(e)}")
+            messagebox.showerror("Error", f"Failed to download file: {str(e)}")
 
 def main():
     root = tk.Tk()

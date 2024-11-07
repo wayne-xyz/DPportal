@@ -138,7 +138,7 @@ class TifDownloader:
             exportSizeSqMeters = shape_size * 10000 * 2
 
         centroid = feature.geometry().centroid()
-        halfSideLength = (exportSizeSqMeters ** 0.5) / 2
+        halfSideLength = (exportSizeSqMeters ** 0.5)
         exportRegion = centroid.buffer(halfSideLength).bounds()
 
         res_scale = 5 if source_name == "nicfi" else 10
