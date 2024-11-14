@@ -1,11 +1,11 @@
 cron:
 
-- description: "48 hours task to save the static data"
+- description: "weekly task to update the static data"
   url: /daily_task
-  schedule: every 48 hours
+  schedule: every monday 00:00
   timezone: UTC
 
-- description: "monthly task to update the static data"
+- description: "monthly task to add the tif files to the drive"
   url: /update_task
   schedule: 15 of month 00:00
   timezone: UTC

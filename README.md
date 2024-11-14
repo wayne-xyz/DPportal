@@ -13,6 +13,20 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
 
 ## Update Log
+- 2024/11/13
+    - update the statistics page time to be weekly update.
+    - Performance each update task for history data ,from 2024/10 to 2020/10 of nicfi
+    - update the tif export size function, update the rules for the export size.
+        -  Size options for exporting images:
+        -  1. For areas < 1 ha: Export a 3 ha square region centered on feature
+        -  2. For areas 1-4 ha: Export a 5 ha square region centered on feature  
+        -  3. For areas 4-10 ha: Export a region 3x the area centered on feature
+        -  4. For areas >= 10 ha: Export using the actual feature bounds
+
+- 2024/11/02
+    - after tried the F1 instance, it still has the problem of the memory limit, exceed the 384, so switch back to F2
+
+
 - 2024/10/30
     - add the new data statistics page, using the csv from google drive 
     - update the ui of home page and the footer to the statistics page
@@ -64,7 +78,7 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 - Preview jpeg files, only jpeg files are supported.
 - Download file, both jpeg and tif files are supported.
 - Include the tif:sentinel(2024), nicfi(2024), jpeg: EsriworldImagery.
-
+- Tif files size using two type, if small than 4ha, the size will be 50000 sq meters, if larger than 4ha, the size will be 200000 sq meters.
 
 
 

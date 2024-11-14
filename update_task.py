@@ -29,24 +29,47 @@ if SERVICE_ACCOUNT_KEY_FILE not in os.listdir():
 
 # Utility functions
 def is_production():
+    """
+    Check if code is running in production environment on Google App Engine
+    Returns:
+        bool: True if running in production, False if running locally
+    """
     return os.getenv('GAE_ENV', '').startswith('standard')
 
 def get_credentials():
+    """
+    Get Google service account credentials for Drive and Earth Engine APIs
+    Returns:
+        Credentials: Service account credentials object with required scopes
+    """
     return service_account.Credentials.from_service_account_file(
         SERVICE_ACCOUNT_KEY_FILE, 
         scopes=['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/earthengine']
     )
 
 def initialize_ee():
+    """
+    Initialize Earth Engine with service account credentials if not already initialized
+    """
     if not ee.data._initialized:
         ee.Initialize(get_credentials(), project=EE_PROJECT_ID)
         print("Earth Engine initialized.")
 
 def read_task_yaml():
+    """
+    Read configuration from YAML file containing task parameters
+    Returns:
+        dict: Dictionary containing task configuration parameters
+    """
     with open(TASK_YAML_FILE_PATH, 'r') as task_file:
         return yaml.safe_load(task_file)
 
 def read_target_index_csv():
+    """
+    Read target indices from CSV file containing shape indices to process
+    Returns:
+        list: List of target shape indices
+    """
     df = pd.read_csv(EXPORT_TARGET_SHAPE_INDEX_FILE_PATH)
     return df['Index'].tolist()
 
@@ -56,27 +79,55 @@ TARGET_INDEX_LIST = read_target_index_csv()
 
 
 # Image Source classes
+# Abstract base class defining interface for different image sources
 class ImageSource(ABC):
     @abstractmethod
     def get_collection(self, start_date: str, end_date: str) -> ee.ImageCollection:
+        """Get image collection for given date range
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+        Returns:
+            ee.ImageCollection filtered by date range
+        """
         pass
 
     @abstractmethod
     def get_export_dates(self, start_date: str, end_date: str) -> List[Tuple[str, str]]:
+        """Get list of date ranges to export
+        Args:
+            start_date: Start date in YYYY-MM-DD format 
+            end_date: End date in YYYY-MM-DD format
+        Returns:
+            List of (start_date, end_date) tuples for export
+        """
         pass
 
+# Implementation for NICFI Planet imagery source
 class NICFISource(ImageSource):
     def get_collection(self, start_date: str, end_date: str) -> ee.ImageCollection:
+        """Get NICFI image collection filtered by date range"""
         return ee.ImageCollection(NICFI_IMAGE_PROJECT).filterDate(start_date, end_date)
 
     def get_export_dates(self, start_date: str, end_date: str) -> List[Tuple[str, str]]:
+        """Get export dates for NICFI - returns single date range since NICFI provides monthly mosaics"""
         return [(start_date, end_date)]
 
+# Implementation for Sentinel-2 imagery source 
 class SentinelSource(ImageSource):
     def get_collection(self, start_date: str, end_date: str) -> ee.ImageCollection:
+        """Get Sentinel-2 image collection filtered by date range"""
         return ee.ImageCollection(SENTINEL_IMAGE_PROJECT).filterDate(start_date, end_date)
 
     def get_export_dates(self, start_date: str, end_date: str) -> List[Tuple[str, str]]:
+        """Get export dates for Sentinel - splits each month into 3 10-day periods
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+        Returns:
+            List of (start_date, end_date) tuples, with each month split into 3 periods:
+            1-10, 11-20, and 21-end of month
+        """
         start = datetime.datetime.strptime(start_date, "%Y-%m-%d")
         end = datetime.datetime.strptime(end_date, "%Y-%m-%d")
         dates = []
@@ -91,9 +142,20 @@ class SentinelSource(ImageSource):
             start = (month_end + datetime.timedelta(days=1))
         return dates
 
-# TIF Downloader class
+# TIF Downloader class - Handles downloading and exporting TIF files from Earth Engine
 class TifDownloader:
+    """
+    Main class for downloading TIF files from Earth Engine.
+    Handles both NICFI and Sentinel imagery sources.
+    """
     def __init__(self, image_source: ImageSource, start_date: str, end_date: str):
+        """
+        Initialize TIF downloader with image source and date range
+        Args:
+            image_source: Source of imagery (NICFI or Sentinel)
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+        """
         self.image_source = image_source
         self.start_date = start_date
         self.end_date = end_date
@@ -104,6 +166,11 @@ class TifDownloader:
         self.pending_tasks = []
 
     def get_drive_folder(self):
+        """
+        Get the appropriate Google Drive folder name based on image source
+        Returns:
+            str: Folder name from YAML config
+        """
         task_data = read_task_yaml()
         if isinstance(self.image_source, NICFISource):
             return task_data['nicfi_folder_name'] 
@@ -113,43 +180,95 @@ class TifDownloader:
             raise ValueError("Unknown image source type")
 
     def get_shapefile_table(self):
+        """
+        Load the shapefile feature collection from Earth Engine
+        Returns:
+            ee.FeatureCollection: Table of shapes to process
+        """
         shapefile_table = ee.FeatureCollection(SHARED_ASSETS_ID)
         print(f"The shapefile table has {shapefile_table.size().getInfo()} features")
         return shapefile_table
 
     def process_index(self, index: int, start_date: str, end_date: str):
+        """
+        Process a single index from the shapefile table
+        Args:
+            index: Index number to process
+            start_date: Start date for filtering imagery
+            end_date: End date for filtering imagery
+        """
+        # Convert index to integer to ensure proper filtering
+        index = int(index)
+        
+        # Get the feature and check if it exists
         feature = self.shapefile_table.filter(ee.Filter.eq('Index', index)).first()
-        area_info = self.get_area_info(index, feature)
-        print(f"Processing Index {index}: {area_info}")
+        
+        # Check if feature exists before proceeding
+        feature_info = feature.getInfo()
+        if feature_info is None:
+            print(f"No feature found for index {index}. Please verify the index exists in the shapefile table.")
+            return
+            
+
+
+        area_info = self.get_area_info(index, feature) 
+
         if index in TARGET_INDEX_LIST:
             collection = self.image_source.get_collection(start_date, end_date)
             self.export_tif_for_index(index, feature, collection, start_date, end_date)
 
     def get_area_info(self, index: int, feature: ee.Feature) -> str:
+        """
+        Get area information for a feature
+        Args:
+            index: Index number of feature
+            feature: Earth Engine feature
+        Returns:
+            str: Formatted string with area info
+        """
         size = feature.geometry().area().getInfo()
         df = pd.read_csv(SHAPEFILE_DATA_PATH)
         area_value = df.loc[df['Index'] == index, 'AREA_HA'].values[0]
-        return f"Size: {size} sq meters, Area: {area_value} hectares"
+        return f"Size from geometry getInfo: {size} sq meters, Area from csv file: {area_value} hectares"
 
     def export_tif_image_dynamic_size(self, ind, feature, image, date_str, source_name, shape_size):
-        if shape_size < 4:
-            exportSizeSqMeters = 5 * 10000
+        """
+        Export a TIF image with dynamic sizing based on shape area
+        Args:
+            ind: Index number
+            feature: Earth Engine feature
+            image: Image to export
+            date_str: Date string for filename
+            source_name: Source type (nicfi/sentinel)
+            shape_size: Size of shape in hectares
+        """
+        # example index: for the size categri of tif image : 661, 1585,662,1135,381,303,1359,1810
+        # Size options for exporting images:
+        # 1. For areas < 1 ha: Export a 3 ha square region centered on feature
+        # 2. For areas 1-4 ha: Export a 5 ha square region centered on feature  
+        # 3. For areas 4-10 ha: Export a region 3x the area centered on feature
+        # 4. For areas >= 10 ha: Export using the actual feature bounds
+        if shape_size < 10:
+            exportSizeSqMeters = 3 * 10000 if shape_size < 1 else (5 * 10000 if shape_size < 4 else shape_size * 10000 * 3)  # Use 3ha for tiny areas (<1ha), 5ha for small areas (1-4ha), or area*3 for larger areas
+
+            # Create a square region centered on the feature's centroid
+            centroid = feature.geometry().centroid()
+            halfSideLength = (exportSizeSqMeters ** 0.5)  # Square root to get side length
+            exportRegion = centroid.buffer(halfSideLength).bounds()
         else:
-            exportSizeSqMeters = shape_size * 10000 * 2
+            # For large areas (>=10 ha), use the feature's actual bounds
+            exportRegion = feature.geometry().bounds()
 
-        centroid = feature.geometry().centroid()
-        halfSideLength = (exportSizeSqMeters ** 0.5) / 2
-        exportRegion = centroid.buffer(halfSideLength).bounds()
-
+        # resolution scale for nicfi is 5m, for sentinel is 10m
         res_scale = 5 if source_name == "nicfi" else 10
 
-        # for nicfi the date_str should be the YYYY-MM format, for sentinel the date_str should be the YYYYMMDD format
+        # Format date string based on source type
         if source_name == "nicfi":
             date_str = date_str[:7]
         else:
             date_str = date_str[:4] + date_str[5:7] + date_str[8:]  
 
-        # export the image to the drive
+        # Create and queue export task
         task = ee.batch.Export.image.toDrive(
             image=image.clip(exportRegion),
             description=f"export_{ind}_{date_str}",
@@ -165,6 +284,15 @@ class TifDownloader:
         print(f"Export task created for index {ind} with date {date_str},save to folder {self.drive_folder}")
 
     def export_tif_for_index(self, index: int, feature: ee.Feature, collection: ee.ImageCollection, start_date: str, end_date: str):
+        """
+        Export TIF file for a specific index and date range
+        Args:
+            index: Index number to export
+            feature: Earth Engine feature
+            collection: Image collection to process
+            start_date: Start date
+            end_date: End date
+        """
         df = pd.read_csv(SHAPEFILE_DATA_PATH)
         shape_size = df.loc[df['Index'] == index, 'AREA_HA'].values[0]
         
@@ -172,19 +300,27 @@ class TifDownloader:
         date_str = start_date
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
         
+        
         self.export_tif_image_dynamic_size(index, feature, image, date_str, source_name, shape_size)
 
     @property
     def task_count(self):
+        """Get current task count"""
         return self._task_count
 
     @task_count.setter
     def task_count(self, value):
+        """
+        Set task count and print change
+        Args:
+            value: New task count value
+        """
         if value != self._task_count:
             print(f"Task count changed: {self._task_count} -> {value}")
             self._task_count = value
 
     def wait_for_tasks_completion(self):
+        """Wait for all pending tasks to complete, checking status periodically"""
         while self.pending_tasks:
             time.sleep(TASK_CHECK_INTERVAL)
             completed_tasks = []
@@ -197,18 +333,27 @@ class TifDownloader:
             self.pending_tasks = [task for task in self.pending_tasks if task not in completed_tasks]
 
     def start_pending_tasks(self):
+        """Start pending tasks up to maximum concurrent limit"""
         while self.pending_tasks and self.task_count < MAX_CONCURRENT_TASKS:
             task = self.pending_tasks.pop(0)
             task.start()
             print(f"Started task {task.id}")
 
     def is_ee_tasklist_clear(self):
+        """
+        Check if Earth Engine task list is clear
+        Returns:
+            bool: True if no tasks are running/ready
+        """
         tasks = ee.batch.Task.list()
         return all(task.state not in ['READY', 'RUNNING'] for task in tasks)
 
 
-# download all the tif files for all the target indices
     def download_all(self):
+        """
+        Download TIF files for all target indices in the date range.
+        Processes each date range and index combination, managing concurrent tasks.
+        """
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
         print(f"Starting TIF file download for all target indices, source: {source_name}, folder: {self.drive_folder}, period {self.start_date} to {self.end_date}: {datetime.now()}")
         
@@ -224,50 +369,79 @@ class TifDownloader:
         # Wait for all remaining tasks to complete
         self.wait_for_tasks_completion()
 
-    # download the tif file for the given index, start date and end date
     def download_single(self, index: int):
+        """
+        Download TIF file for a single index in the date range
+        Args:
+            index: Index number to download
+        """
+        # Determine the source name (nicfi or sentinel) based on image source type
         source_name = "nicfi" if isinstance(self.image_source, NICFISource) else "sentinel"
         print(f"Starting TIF file download for index {index}, source: {source_name}, period {self.start_date} to {self.end_date}: {datetime.now()}")
         
+        # Process flow:
+        # 1. Get list of date ranges to process from image source
+        # 2. For each date range:
+        #    - Process the index for that date range
+        #    - Check if we've hit max concurrent tasks
+        #    - Start any pending tasks if we have capacity
+        # 3. Wait for all tasks to complete at the end
+        
+        # Get date ranges from image source (single range for NICFI, multiple 10-day periods for Sentinel)
         for start_date, end_date in self.image_source.get_export_dates(self.start_date, self.end_date):
+            # Process this index for the current date range
             self.process_index(index, start_date, end_date)
             
+            # If we've hit max concurrent tasks, wait for some to complete
             if self.task_count >= MAX_CONCURRENT_TASKS:
                 self.wait_for_tasks_completion()
             
+            # Start any pending tasks if we have capacity
             self.start_pending_tasks()
         
-        # Wait for all remaining tasks to complete
+        # Ensure all tasks have completed before returning
+        # This prevents the function from returning while tasks are still running
         self.wait_for_tasks_completion()
 
 
 
 
-# download the tif file for the given index, start date and end date
 def download_tif_file_by_index(index: int, source_type: str, start_date: str, end_date: str):
-    # parameter: 
-    # index: the index of the shapefile
-    # start_date: the start date of the period to download, format: YYYY-MM-DD
-    # end_date: the end date of the period to download, format: YYYY-MM-DD
+    """Downloads TIF files for a specific shape index and date range.
 
-    # get the image source
+    Args:
+        index: Shape index from the shapefile to download imagery for
+        source_type: Type of imagery source ('nicfi' or 'sentinel')
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
+    """
+    # Get the appropriate image source (NICFI or Sentinel) based on source_type
     image_source = get_image_source(source_type)
 
-    # initialize the ee
+    # Initialize Earth Engine with credentials if not already initialized
     initialize_ee()
 
-    # create the downloader
+    # Create TIF downloader instance for the specified date range and image source
     downloader = TifDownloader(image_source, start_date, end_date)
 
+    # Check if there are any images available in the date range
     collection_size = image_source.get_collection(start_date, end_date).size().getInfo()
     if collection_size == 0:
         print(f"No images found for {source_type} in the date range {start_date} to {end_date}.")
         return
     
-
-
+    # If images found, start downloading for the specified index
     print(f"Found {collection_size} images for {source_type} in the date range {start_date} to {end_date}. Starting download...")
     downloader.download_single(index)
+
+    # Process flow:
+    # 1. Get image source (NICFI/Sentinel) based on source_type parameter
+    # 2. Initialize Earth Engine with credentials
+    # 3. Create TifDownloader instance with image source and date range
+    # 4. Check if any images exist in the collection for the date range
+    # 5. If no images found, print message and return
+    # 6. If images found, start downloading TIF files for the specified index
+    # Note: The actual download process is handled by the TifDownloader class
 
 
 
