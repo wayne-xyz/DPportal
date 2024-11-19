@@ -249,11 +249,11 @@ def download_file_from_drive(file_id, file_path):
         print(f"An error occurred while downloading: {str(e)}")
 
 
-# only for testing
+# manuly run the statistics of the image file names
 def main():
     # parse_file_name_to_csv()
     
-    fetch_csv_file_from_drive()
+    image_files_names_statistics_to_csv()
     pass
 
 if __name__ == "__main__":

@@ -203,6 +203,11 @@ def get_statistics_csv():
             logging.error("CSV file not found")
             return jsonify({'error': 'Statistics file not found'}), 404
             
+        # Get file metadata including modification time
+        file_metadata = service.files().get(fileId=file_id, 
+                                          fields='modifiedTime').execute()
+        modified_time = file_metadata.get('modifiedTime')
+        
         try:
             # Download file content
             request = service.files().get_media(fileId=file_id)
@@ -238,7 +243,10 @@ def get_statistics_csv():
             data.sort(key=lambda x: datetime.strptime(x['Month'], '%b %Y'), reverse=True)
             
             logging.info(f"Successfully fetched and parsed CSV with {len(data)} rows")
-            return jsonify(data)
+            return jsonify({
+                'data': data,
+                'lastUpdated': modified_time
+            })
             
         except Exception as file_error:
             logging.error(f"Error reading file content: {str(file_error)}")

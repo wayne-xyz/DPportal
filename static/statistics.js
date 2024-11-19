@@ -20,15 +20,35 @@ function showError(message) {
     errorDiv.style.display = 'block';
 }
 
+// Add this function to format the date
+function formatDateTime(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
 // Display data in table
-function displayStatistics(data) {
+function displayStatistics(response) {
     const table = document.getElementById('statistics-table');
     const title = document.getElementById('statistics-title');
     const tbody = table.querySelector('tbody');
     tbody.innerHTML = ''; // Clear existing content
     
+    // Add last updated time
+    const lastUpdatedDiv = document.getElementById('last-updated');
+    if (response.lastUpdated) {
+        lastUpdatedDiv.textContent = `Last Updated: ${formatDateTime(response.lastUpdated)}`;
+        lastUpdatedDiv.style.display = 'block';
+    }
+    
     // Add each row to table
-    data.forEach(row => {
+    response.data.forEach(row => {
         const tr = document.createElement('tr');
         
         // Format numbers with thousands separator

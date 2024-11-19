@@ -121,6 +121,14 @@
             margin-bottom: 10px;
             border-bottom: 2px solid #3498db;
         }
+        
+        .last-updated-text {
+            font-size: 0.9em;
+            color: #666;
+            margin: 10px 0;
+            text-align: right;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -151,6 +159,9 @@
             </tbody>
         </table>
     </div>
+    
+    <!-- Add this somewhere near your table -->
+    <div id="last-updated" class="last-updated-text"></div>
     
     <script src="{{ url_for('static', filename='statistics.js') }}"></script>
 </body>
