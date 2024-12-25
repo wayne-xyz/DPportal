@@ -3,6 +3,43 @@ portal website on Google cloud App Engine
 
 URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 
+
+## High Level Diagram
+
+```mermaid
+graph TD
+    subgraph Data Sources
+        nicfi[Planet NICFI Data]
+        sentinel[Sentinel-2 Data]
+        arcgis[ArcGIS Pro]
+    end
+
+    subgraph Google Cloud Platform
+        ee[Google Earth Engine]
+        drive[Google Drive]
+        gae[Google App Engine]
+    end
+
+    %% Data flow from sources to Earth Engine
+    nicfi --> ee
+    sentinel --> ee
+
+    %% Processing and storage
+    ee -->|Export TIF files| drive
+    arcgis -->|Manual JPEG export| drive
+
+    %% Web application
+    drive -->|Fetch files| gae
+    gae -->|Serve website| users((Users))
+
+    %% Styling
+    classDef cloud fill:#f0f5ff,stroke:#3b82f6,stroke-width:2px
+    classDef source fill:#ecfdf5,stroke:#059669,stroke-width:2px
+    class ee,drive,gae cloud
+    class nicfi,sentinel,arcgis source
+```
+
+
 ## Developing ToDo List
 - [X] Support search by name of dumpsite ( auto-complete typing)
 - [X] migrate all the jpeg files from OneDrive to Google Drive 
