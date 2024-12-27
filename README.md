@@ -7,12 +7,14 @@ URL: https://stone-armor-430205-e2.uc.r.appspot.com/
 ## High Level Diagram
 
 ```mermaid
+
 graph TD
     subgraph Data Sources
         nicfi[Planet NICFI Data]
         sentinel[Sentinel-2 Data]
         arcgis[ArcGIS Pro]
     end
+
 
     subgraph Google Cloud Platform
         ee[Google Earth Engine]
@@ -25,18 +27,20 @@ graph TD
     sentinel --> ee
 
     %% Processing and storage
-    ee -->|Export TIF files| drive
-    arcgis -->|Manual JPEG export| drive
+    ee -->|GEEExpUI| drive
+    arcgis -->|ArcPy Batch Processing| drive
 
     %% Web application
     drive -->|Fetch files| gae
-    gae -->|Serve website| users((Users))
+    gae -->|Flask web server| users((Users))
 
     %% Styling
     classDef cloud fill:#f0f5ff,stroke:#3b82f6,stroke-width:2px
     classDef source fill:#ecfdf5,stroke:#059669,stroke-width:2px
     class ee,drive,gae cloud
     class nicfi,sentinel,arcgis source
+
+
 ```
 
 
