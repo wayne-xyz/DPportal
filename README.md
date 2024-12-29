@@ -42,7 +42,12 @@ graph TD
 
 
 ```
-
+## Portal WebsiteVersion 1.0 Features 
+- Search for files in Google Drive, by the index number of dumpsite, and the name of dumpsite.
+- Preview jpeg files, only jpeg files are supported.
+- Download file, both jpeg and tif files are supported.
+- Include the tif:sentinel, nicfi, jpeg: EsriworldImagery.
+- Map viewer functionality with the feature layer of the dumpsite.
 
 ## Developing ToDo List
 - [X] Support search by name of dumpsite ( auto-complete typing)
@@ -114,12 +119,7 @@ graph TD
 
 
 
-## Version 1.0 Features 
-- Search for files in Google Drive, by the index number of dumpsite, and the name of dumpsite.
-- Preview jpeg files, only jpeg files are supported.
-- Download file, both jpeg and tif files are supported.
-- Include the tif:sentinel(2024), nicfi(2024), jpeg: EsriworldImagery.
-- Tif files size using two type, if small than 4ha, the size will be 50000 sq meters, if larger than 4ha, the size will be 200000 sq meters.
+
 
 
 
